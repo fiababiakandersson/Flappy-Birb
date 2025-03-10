@@ -25,7 +25,7 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         this.alienGame = alienGame;
         this.batch = new SpriteBatch();
         this.bigFont = new BitmapFont();
-        this.alienHead = new AnimatedSprite("oldAlienhead.png", (width / 2) - (219 / 2), 130, 219, 240);
+        this.alienHead = new AnimatedSprite("alien.png", (width / 2) - (219 / 2), 130, 219, 240);
 
         // should maybe use Label instead of drawing with fonts directly
         // also, scaling bitmap fonts are really ugly

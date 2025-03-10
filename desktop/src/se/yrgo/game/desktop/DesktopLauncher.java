@@ -8,7 +8,7 @@ public class DesktopLauncher {
 	public static void main(String[] arg) {
 		// this is where we configure how our program starts on the desktop
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		config.setWindowedMode(390, 844);
+		config.setWindowedMode(750, 1150);
 		new Lwjgl3Application(new AlienGame(), config);
 	}
 }

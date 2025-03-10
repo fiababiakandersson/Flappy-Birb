@@ -73,8 +73,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
 	@Override
 	public void render(float deltaTime) {
+		// set background color
+		// Gdx.gl.glClearColor(0.043f, 0.078f, 0.22f, 1.0f);
+		// Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT); //
+		// ensure full clearing
+
 		if (gameOver) {
-			alienGame.gameOver();
 			return;
 		}
 
