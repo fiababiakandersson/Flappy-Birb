@@ -1,61 +1,59 @@
 package se.yrgo.game;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.ScreenUtils;
+import java.util.*;
+import java.util.concurrent.*;
+
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.Input.*;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.utils.*;
 
 public class GameScreen extends ScreenAdapter implements InputProcessor {
-    private static final int ALIEN_SIZE = 20;
-    private static final int SHIP_WIDTH = 46;
-    private static final int SHIP_HEIGHT = 20;
-    private static final float SPEED_START = 50;
+	private static final int ALIEN_SIZE = 20;
+	private static final int SHIP_WIDTH = 46;
+	private static final int SHIP_HEIGHT = 20;
+	private static final float SPEED_START = 50;
 
-    private AlienGame alienGame;
-    private SpriteBatch batch;
+	private AlienGame alienGame;
+	private SpriteBatch batch;
 	private AnimatedSprite ship;
-    private Texture alienTexture;
+	private Texture alienTexture;
 	private List<AnimatedSprite> aliens;
 	private boolean gameOver = false;
 	private float elapsedTime;
-    private float speed;
+	private float speed;
 
-    public GameScreen(AlienGame alienGame) {
-        this.alienGame = alienGame;
-        this.alienTexture = new Texture("alien.png");
-        this.aliens = new ArrayList<>();
-        this.batch = new SpriteBatch();
-		this.ship = new AnimatedSprite("ship.png", 0, 0, SHIP_WIDTH, SHIP_HEIGHT);
-    }
+	public GameScreen(AlienGame alienGame) {
+		this.alienGame = alienGame;
+		this.alienTexture = new Texture("earth.png");
+		this.aliens = new ArrayList<>();
+		this.batch = new SpriteBatch();
+		this.ship = new AnimatedSprite("alien.png", 0, 0, SHIP_WIDTH, SHIP_HEIGHT);
+	}
 
-    @Override
-    public void hide() {
-        Gdx.input.setInputProcessor(null);
-    }
+	@Override
+	public void hide() {
+		Gdx.input.setInputProcessor(null);
+	}
 
 	@Override
 	public void show() {
 		final int width = Gdx.graphics.getWidth();
 		final int height = Gdx.graphics.getHeight();
 
-        elapsedTime = 0;
-        speed = SPEED_START;
-        gameOver = false;
+		elapsedTime = 0;
+		speed = SPEED_START;
+		gameOver = false;
 
-        ship.setBounds(new Rectangle(0, 0, width / 2f, height));
-        ship.setPosition(100, height / 2 - SHIP_HEIGHT/2);
+		ship.setBounds(new Rectangle(0, 0, width / 2f, height));
+		ship.setPosition(100, height / 2 - SHIP_HEIGHT / 2);
 
-        aliens.clear();
+		aliens.clear();
 		for (int i = 0; i < 10; ++i) {
 			addAlien(width / 2 + i * 80);
-            speed += 1.3;
+			speed += 1.3;
 		}
 
 		Gdx.input.setInputProcessor(this);
@@ -82,80 +80,76 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
 		elapsedTime += deltaTime;
 
-        updateState(deltaTime);
+		updateState(deltaTime);
 		renderScreen();
 		checkForGameOver();
 	}
 
-    private void updateState(float deltaTime) {
-        speed += 1.5 * deltaTime;
+	private void updateState(float deltaTime) {
+		speed += 1.5 * deltaTime;
 
 		ship.update(deltaTime);
 
-        List<AnimatedSprite> toRemove = new ArrayList<>();
+		List<AnimatedSprite> toRemove = new ArrayList<>();
 		for (AnimatedSprite alien : aliens) {
 			alien.update(deltaTime);
-            if (alien.getX() < -ALIEN_SIZE) {
-                toRemove.add(alien);
-            }
+			if (alien.getX() < -ALIEN_SIZE) {
+				toRemove.add(alien);
+			}
 		}
 
-        aliens.removeAll(toRemove);
-        for (AnimatedSprite alien : toRemove) {
-            alien.dispose();
-            addAlien(Gdx.graphics.getWidth() + ALIEN_SIZE);
-        }
+		aliens.removeAll(toRemove);
+		for (AnimatedSprite alien : toRemove) {
+			alien.dispose();
+			addAlien(Gdx.graphics.getWidth() + ALIEN_SIZE);
+		}
 
-        alienGame.addPoints((int)(toRemove.size() * speed));
-    }
-    
-    private void renderScreen() {
-        ScreenUtils.clear(0.98f, 0.98f, 0.98f, 1);
-        
+		alienGame.addPoints((int) (toRemove.size() * speed));
+	}
+
+	private void renderScreen() {
+		ScreenUtils.clear(0.98f, 0.98f, 0.98f, 1);
+
 		batch.begin();
 		ship.draw(batch, elapsedTime);
 		for (AnimatedSprite alien : aliens) {
-            alien.draw(batch, elapsedTime);
+			alien.draw(batch, elapsedTime);
 		}
 		batch.end();
-    }
-    
-    private void checkForGameOver() {
-        for (AnimatedSprite alien : aliens) {
-            if (alien.overlaps(ship)) {
-                gameOver = true;
-            }
-        }
-    }
-    
+	}
+
+	private void checkForGameOver() {
+		for (AnimatedSprite alien : aliens) {
+			if (alien.overlaps(ship)) {
+				gameOver = true;
+			}
+		}
+	}
+
 	@Override
 	public void dispose() {
 		batch.dispose();
 		ship.dispose();
-        alienTexture.dispose();
+		alienTexture.dispose();
 		for (AnimatedSprite alien : aliens) {
-            alien.dispose();
+			alien.dispose();
 		}
 	}
 
 	@Override
 	public boolean keyDown(int keycode) {
-        final float SPEED_CHANGE = 30;
+		final float SPEED_CHANGE = 30;
 		if (keycode == Keys.UP) {
 			ship.setDeltaY(ship.getDeltaY() + SPEED_CHANGE);
-		}
-		else if (keycode == Keys.DOWN) {
+		} else if (keycode == Keys.DOWN) {
 			ship.setDeltaY(ship.getDeltaY() - SPEED_CHANGE);
-		}
-		else if (keycode == Keys.LEFT) {
+		} else if (keycode == Keys.LEFT) {
 			ship.setDeltaX(ship.getDeltaX() - SPEED_CHANGE);
-		}
-		else if (keycode == Keys.RIGHT) {
+		} else if (keycode == Keys.RIGHT) {
 			ship.setDeltaX(ship.getDeltaX() + SPEED_CHANGE);
+		} else if (keycode == Keys.ESCAPE) {
+			gameOver = true;
 		}
-        else if (keycode == Keys.ESCAPE) {
-            gameOver = true;
-        }
 
 		return true;
 	}
@@ -198,5 +192,5 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	@Override
 	public boolean scrolled(float amountX, float amountY) {
 		return false;
-	}    
+	}
 }
