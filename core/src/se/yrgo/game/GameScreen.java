@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
 
 public class GameScreen extends ScreenAdapter implements InputProcessor {
-	private static final int ALIEN_SIZE = 20;
+	// private static final int ALIEN_SIZE = 20;
 	private static final int SHIP_WIDTH = 46;
 	private static final int SHIP_HEIGHT = 20;
 	private static final float SPEED_START = 50;
@@ -19,20 +19,28 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	private AlienGame alienGame;
 	private SpriteBatch batch;
 	private AnimatedSprite ship;
-	private Texture alienTexture;
-	private List<AnimatedSprite> aliens;
+	private Texture planetTexture;
+	private List<AnimatedSprite> planets;
 	private boolean gameOver = false;
 	private float elapsedTime;
 	private float speed;
 
-	private String[] planets = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
+	private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
 
 	public GameScreen(AlienGame alienGame) {
 		this.alienGame = alienGame;
-		this.alienTexture = new Texture("earth.png");
-		this.aliens = new ArrayList<>();
+		// this.planetTexture = new Texture("earth.png");
 		this.batch = new SpriteBatch();
 		this.ship = new AnimatedSprite("alien.png", 0, 0, SHIP_WIDTH, SHIP_HEIGHT);
+		this.planets = new ArrayList<>();
+	}
+
+	private String randomizePlanet() {
+		Random random = new Random();
+		int randomPlanetIndex = random.nextInt(planetsArr.length);
+		String randomPlanet = planetsArr[randomPlanetIndex];
+
+		return randomPlanet;
 	}
 
 	@Override
@@ -52,33 +60,29 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 		ship.setBounds(new Rectangle(0, 0, width / 2f, height));
 		ship.setPosition(100, height / 2 - SHIP_HEIGHT / 2);
 
-		aliens.clear();
+		planets.clear();
 		for (int i = 0; i < 10; ++i) {
-			addAlien(width / 2 + i * 80);
+			addPlanet(width / 2 + i * 80);
 			speed += 1.3;
 		}
 
 		Gdx.input.setInputProcessor(this);
 	}
 
-	private String randomizePlanet() {
-		Random random = new Random();
-		int randomPlanetIndex = random.nextInt(planets.length);
-		String randomPlanet = planets[randomPlanetIndex];
-
-		return randomPlanet;
-	}
-
-	private void addAlien(int x) {
+	private void addPlanet(int x) {
 		int range = Gdx.graphics.getHeight() - SHIP_HEIGHT;
 		int y = ThreadLocalRandom.current().nextInt(range);
-		addAlien(x, y);
+		addPlanet(x, y);
 	}
 
-	private void addAlien(int x, int y) {
-		AnimatedSprite alien = new AnimatedSprite(alienTexture, x, y, ALIEN_SIZE, ALIEN_SIZE);
-		alien.setDeltaX(-speed);
-		aliens.add(alien);
+	private void addPlanet(int x, int y) {
+		String planettexturePath = randomizePlanet();
+		this.planetTexture = new Texture(planettexturePath);
+
+		AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(),
+				planetTexture.getHeight());
+		planet.setDeltaX(-speed);
+		planets.add(planet);
 	}
 
 	@Override
@@ -105,17 +109,17 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 		ship.update(deltaTime);
 
 		List<AnimatedSprite> toRemove = new ArrayList<>();
-		for (AnimatedSprite alien : aliens) {
-			alien.update(deltaTime);
-			if (alien.getX() < -ALIEN_SIZE) {
-				toRemove.add(alien);
+		for (AnimatedSprite planet : planets) {
+			planet.update(deltaTime);
+			if (planet.getX() < -planetTexture.getWidth()) {
+				toRemove.add(planet);
 			}
 		}
 
-		aliens.removeAll(toRemove);
-		for (AnimatedSprite alien : toRemove) {
-			alien.dispose();
-			addAlien(Gdx.graphics.getWidth() + ALIEN_SIZE);
+		planets.removeAll(toRemove);
+		for (AnimatedSprite planet : toRemove) {
+			planet.dispose();
+			addPlanet(Gdx.graphics.getWidth() + planetTexture.getWidth());
 		}
 
 		alienGame.addPoints((int) (toRemove.size() * speed));
@@ -126,15 +130,15 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
 		batch.begin();
 		ship.draw(batch, elapsedTime);
-		for (AnimatedSprite alien : aliens) {
-			alien.draw(batch, elapsedTime);
+		for (AnimatedSprite planet : planets) {
+			planet.draw(batch, elapsedTime);
 		}
 		batch.end();
 	}
 
 	private void checkForGameOver() {
-		for (AnimatedSprite alien : aliens) {
-			if (alien.overlaps(ship)) {
+		for (AnimatedSprite planet : planets) {
+			if (planet.overlaps(ship)) {
 				gameOver = true;
 			}
 		}
@@ -144,9 +148,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	public void dispose() {
 		batch.dispose();
 		ship.dispose();
-		alienTexture.dispose();
-		for (AnimatedSprite alien : aliens) {
-			alien.dispose();
+		planetTexture.dispose();
+		for (AnimatedSprite planet : planets) {
+			planet.dispose();
 		}
 	}
 
