@@ -25,6 +25,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	private float elapsedTime;
 	private float speed;
 
+	private String[] planets = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
+
 	public GameScreen(AlienGame alienGame) {
 		this.alienGame = alienGame;
 		this.alienTexture = new Texture("earth.png");
@@ -57,6 +59,14 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 		}
 
 		Gdx.input.setInputProcessor(this);
+	}
+
+	private String randomizePlanet() {
+		Random random = new Random();
+		int randomPlanetIndex = random.nextInt(planets.length);
+		String randomPlanet = planets[randomPlanetIndex];
+
+		return randomPlanet;
 	}
 
 	private void addAlien(int x) {
