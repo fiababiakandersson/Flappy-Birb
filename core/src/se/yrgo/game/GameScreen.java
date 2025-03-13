@@ -8,7 +8,6 @@ import com.badlogic.gdx.Input.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.utils.*;
 
 public class GameScreen extends ScreenAdapter implements InputProcessor {
 	// private static final int ALIEN_SIZE = 20;
@@ -87,11 +86,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
 	@Override
 	public void render(float deltaTime) {
-		// set background color
-		// Gdx.gl.glClearColor(0.043f, 0.078f, 0.22f, 1.0f);
-		// Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT); //
-		// ensure full clearing
-
 		if (gameOver) {
 			return;
 		}
@@ -126,7 +120,10 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	}
 
 	private void renderScreen() {
-		ScreenUtils.clear(0.98f, 0.98f, 0.98f, 1);
+		// set background color
+		Gdx.gl.glClearColor(0.043f, 0.078f, 0.22f, 1.0f);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		// ensure full clearing
 
 		batch.begin();
 		ship.draw(batch, elapsedTime);
