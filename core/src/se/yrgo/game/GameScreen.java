@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
 
 public class GameScreen extends ScreenAdapter implements InputProcessor {
-	// private static final int ALIEN_SIZE = 20;
 	private static final int SHIP_WIDTH = 46;
 	private static final int SHIP_HEIGHT = 20;
 	private static final float SPEED_START = 50;
@@ -28,12 +27,16 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
 	public GameScreen(AlienGame alienGame) {
 		this.alienGame = alienGame;
-		// this.planetTexture = new Texture("earth.png");
 		this.batch = new SpriteBatch();
 		this.ship = new AnimatedSprite("alien.png", 0, 0, SHIP_WIDTH, SHIP_HEIGHT);
 		this.planets = new ArrayList<>();
 	}
 
+	/**
+	 * get random planet image url, based on planetsArr
+	 * 
+	 * @return String image path of a random planet
+	 */
 	private String randomizePlanet() {
 		Random random = new Random();
 		int randomPlanetIndex = random.nextInt(planetsArr.length);
@@ -120,10 +123,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	}
 
 	private void renderScreen() {
-		// set background color
+		// set blue background color
 		Gdx.gl.glClearColor(0.043f, 0.078f, 0.22f, 1.0f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		// ensure full clearing
 
 		batch.begin();
 		ship.draw(batch, elapsedTime);
