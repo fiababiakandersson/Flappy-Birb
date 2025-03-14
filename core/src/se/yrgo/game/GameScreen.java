@@ -10,13 +10,13 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
 
 public class GameScreen extends ScreenAdapter implements InputProcessor {
-	private static final int SHIP_WIDTH = 46;
-	private static final int SHIP_HEIGHT = 20;
+	private static final int ALIEN_WIDTH = 46;
+	private static final int ALIEN_HEIGHT = 20;
 	private static final float SPEED_START = 50;
 
 	private AlienGame alienGame;
 	private SpriteBatch batch;
-	private AnimatedSprite ship;
+	private AnimatedSprite alien;
 	private Texture planetTexture;
 	private List<AnimatedSprite> planets;
 	private boolean gameOver = false;
@@ -28,7 +28,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	public GameScreen(AlienGame alienGame) {
 		this.alienGame = alienGame;
 		this.batch = new SpriteBatch();
-		this.ship = new AnimatedSprite("alien.png", 0, 0, SHIP_WIDTH, SHIP_HEIGHT);
+		this.alien = new AnimatedSprite("alien.png", 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
 		this.planets = new ArrayList<>();
 	}
 
@@ -59,8 +59,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 		speed = SPEED_START;
 		gameOver = false;
 
-		ship.setBounds(new Rectangle(0, 0, width / 2f, height));
-		ship.setPosition(100, height / 2 - SHIP_HEIGHT / 2);
+		alien.setBounds(new Rectangle(0, 0, width / 2f, height));
+		alien.setPosition(100, height / 2 - ALIEN_HEIGHT / 2);
 
 		planets.clear();
 		for (int i = 0; i < 10; ++i) {
@@ -72,7 +72,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	}
 
 	private void addPlanet(int x) {
-		int range = Gdx.graphics.getHeight() - SHIP_HEIGHT;
+		int range = Gdx.graphics.getHeight() - ALIEN_HEIGHT;
 		int y = ThreadLocalRandom.current().nextInt(range);
 		addPlanet(x, y);
 	}
@@ -103,7 +103,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	private void updateState(float deltaTime) {
 		speed += 1.5 * deltaTime;
 
-		ship.update(deltaTime);
+		alien.update(deltaTime);
 
 		List<AnimatedSprite> toRemove = new ArrayList<>();
 		for (AnimatedSprite planet : planets) {
@@ -128,7 +128,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		batch.begin();
-		ship.draw(batch, elapsedTime);
+		alien.draw(batch, elapsedTime);
 		for (AnimatedSprite planet : planets) {
 			planet.draw(batch, elapsedTime);
 		}
@@ -137,7 +137,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
 	private void checkForGameOver() {
 		for (AnimatedSprite planet : planets) {
-			if (planet.overlaps(ship)) {
+			if (planet.overlaps(alien)) {
 				gameOver = true;
 			}
 		}
@@ -146,7 +146,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	@Override
 	public void dispose() {
 		batch.dispose();
-		ship.dispose();
+		alien.dispose();
 		planetTexture.dispose();
 		for (AnimatedSprite planet : planets) {
 			planet.dispose();
@@ -157,13 +157,13 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 	public boolean keyDown(int keycode) {
 		final float SPEED_CHANGE = 30;
 		if (keycode == Keys.UP) {
-			ship.setDeltaY(ship.getDeltaY() + SPEED_CHANGE);
+			alien.setDeltaY(alien.getDeltaY() + SPEED_CHANGE);
 		} else if (keycode == Keys.DOWN) {
-			ship.setDeltaY(ship.getDeltaY() - SPEED_CHANGE);
+			alien.setDeltaY(alien.getDeltaY() - SPEED_CHANGE);
 		} else if (keycode == Keys.LEFT) {
-			ship.setDeltaX(ship.getDeltaX() - SPEED_CHANGE);
+			alien.setDeltaX(alien.getDeltaX() - SPEED_CHANGE);
 		} else if (keycode == Keys.RIGHT) {
-			ship.setDeltaX(ship.getDeltaX() + SPEED_CHANGE);
+			alien.setDeltaX(alien.getDeltaX() + SPEED_CHANGE);
 		} else if (keycode == Keys.ESCAPE) {
 			gameOver = true;
 		}
