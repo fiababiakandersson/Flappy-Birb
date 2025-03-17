@@ -1,18 +1,14 @@
 package se.yrgo.game;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Texture.*;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.utils.*;
 
 /**
  * Screen for game over. Shows the points for the last game
- * and will start a new game for any keypress. 
+ * and will start a new game for any keypress.
  * 
  */
 public class GameOverScreen extends ScreenAdapter implements InputProcessor {
@@ -29,7 +25,8 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         this.alienGame = alienGame;
         this.batch = new SpriteBatch();
         this.bigFont = new BitmapFont();
-        this.alienHead = new AnimatedSprite("mars.png", (width/2) - (219/2), 130, 219, 240);
+
+        this.alienHead = new AnimatedSprite("alien.png", (width / 2) - (219 / 2), 130, 219, 240);
         
         // should maybe use Label instead of drawing with fonts directly
         // also, scaling bitmap fonts are really ugly
@@ -81,7 +78,7 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         elapsedTime = 0;
         Gdx.input.setInputProcessor(this);
     }
-    
+
     @Override
     public boolean keyTyped(char character) {
         // wait a second before accepting key strokes
@@ -89,10 +86,10 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         if (elapsedTime > 1) {
             alienGame.newGame();
         }
-        
+
         return true;
     }
-    
+
     @Override
     public boolean keyDown(int keycode) {
         return false;
@@ -103,11 +100,11 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         return false;
     }
 
-	@Override
-	public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-		return false;
-	}
-    
+    @Override
+    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         return false;

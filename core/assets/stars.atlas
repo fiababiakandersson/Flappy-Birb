@@ -1,0 +1,48 @@
+
+stars.png
+size: 1024, 256
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+star1
+  rotate: false
+  xy: 2, 2
+  size: 165, 165
+  orig: 165, 165
+  offset: 0, 0
+  index: -1
+star2
+  rotate: false
+  xy: 169, 2
+  size: 165, 165
+  orig: 165, 165
+  offset: 0, 0
+  index: -1
+star3
+  rotate: false
+  xy: 336, 2
+  size: 165, 165
+  orig: 165, 165
+  offset: 0, 0
+  index: -1
+star4
+  rotate: false
+  xy: 503, 2
+  size: 165, 165
+  orig: 165, 165
+  offset: 0, 0
+  index: -1
+star5
+  rotate: false
+  xy: 670, 2
+  size: 165, 165
+  orig: 165, 165
+  offset: 0, 0
+  index: -1
+star6
+  rotate: false
+  xy: 837, 2
+  size: 165, 165
+  orig: 165, 165
+  offset: 0, 0
+  index: -1

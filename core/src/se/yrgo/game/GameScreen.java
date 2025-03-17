@@ -1,15 +1,13 @@
 package se.yrgo.game;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
+import java.util.*;
+import java.util.concurrent.*;
+
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.Input.*;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 /**
@@ -19,19 +17,21 @@ import com.badlogic.gdx.utils.ScreenUtils;
  * Implements {@link InputProcessor} to handle user input.
  */
 public class GameScreen extends ScreenAdapter implements InputProcessor {
-    private static final int ALIEN_SIZE = 20;
-    private static final int SHIP_WIDTH = 46;
-    private static final int SHIP_HEIGHT = 20;
-    private static final float SPEED_START = 50;
+	private static final int ALIEN_WIDTH = 46;
+	private static final int ALIEN_HEIGHT = 20;
+	private static final float SPEED_START = 50;
 
     private AlienGame alienGame;
     private SpriteBatch batch;
-    private AnimatedSprite ship;
-    private Texture alienTexture;
-    private List<AnimatedSprite> aliens;
+    private AnimatedSprite alien;
+    private Texture planetTexture;
+    private List<AnimatedSprite> planets;
     private boolean gameOver = false;
     private float elapsedTime;
     private float speed;
+
+    private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
+
 
     // Gravity and bounce mechanics
     private static final float GRAVITY = -500f; // Gravity affecting the ship
@@ -45,17 +45,31 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
      */
     public GameScreen(AlienGame alienGame) {
         this.alienGame = alienGame;
-        this.alienTexture = new Texture("moon.png");
-        this.aliens = new ArrayList<>();
         this.batch = new SpriteBatch();
-        this.ship = new AnimatedSprite("oldAlien.png", 0, 0, SHIP_WIDTH, SHIP_HEIGHT);
+        this.alien = new AnimatedSprite("alien.png", 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
+        this.planets = new ArrayList<>();
     }
+
+    	/**
+	 * get random planet image url, based on planetsArr
+	 * 
+	 * @return String image path of a random planet
+	 */
+	private String randomizePlanet() {
+		Random random = new Random();
+		int randomPlanetIndex = random.nextInt(planetsArr.length);
+		String randomPlanet = planetsArr[randomPlanetIndex];
+
+		return randomPlanet;
+	}
 
     /** Called when this screen is hidden. Removes the input processor. */
     @Override
     public void hide() {
         Gdx.input.setInputProcessor(null);
     }
+
+
 
     /**
      * Initializes the game screen when it is displayed.
@@ -66,48 +80,55 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         final int width = Gdx.graphics.getWidth();
         final int height = Gdx.graphics.getHeight();
 
-        elapsedTime = 0;
-        speed = SPEED_START;
-        gameOver = false;
+		elapsedTime = 0;
+		speed = SPEED_START;
+		gameOver = false;
 
-        ship.setBounds(new Rectangle(0, 0, width / 2f, height));
-        ship.setPosition(100, height / 2 - SHIP_HEIGHT / 2);
+        alien.setBounds(new Rectangle(0, 0, width / 2f, height));
+        alien.setPosition(100, height / 2 - ALIEN_HEIGHT / 2);
+
 
         // Reset vertical movement and first input flag
-        ship.setDeltaY(0);
+        alien.setDeltaY(0);
         isFirstInput = true;
 
-        aliens.clear();
-        for (int i = 0; i < 10; ++i) {
-            addAlien(width / 2 + i * 80);
-            speed += 1.3;
-        }
+		planets.clear();
+		for (int i = 0; i < 10; ++i) {
+			addPlanet(width / 2 + i * 80);
+			speed += 1.3;
+		}
 
         Gdx.input.setInputProcessor(this);
     }
 
-    /**
-     * Adds an alien at a random Y-coordinate.
-     *
-     * @param x The X-coordinate where the alien should be placed.
-     */
-    private void addAlien(int x) {
-        int range = Gdx.graphics.getHeight() - SHIP_HEIGHT;
-        int y = ThreadLocalRandom.current().nextInt(range);
-        addAlien(x, y);
-    }
 
     /**
-     * Creates an alien sprite at the specified coordinates and adds it to the list.
+     * Adds an planet at a random Y-coordinate.
+     *
+     * @param x The X-coordinate where the planet should be placed.
+     */
+	private void addPlanet(int x) {
+		int range = Gdx.graphics.getHeight() - ALIEN_HEIGHT;
+		int y = ThreadLocalRandom.current().nextInt(range);
+		addPlanet(x, y);
+	}
+
+    
+    /**
+     * Creates an planet sprite at the specified coordinates and adds it to the list.
      *
      * @param x The X-coordinate of the alien.
      * @param y The Y-coordinate of the alien.
      */
-    private void addAlien(int x, int y) {
-        AnimatedSprite alien = new AnimatedSprite(alienTexture, x, y, ALIEN_SIZE, ALIEN_SIZE);
-        alien.setDeltaX(-speed);
-        aliens.add(alien);
-    }
+	private void addPlanet(int x, int y) {
+		String planettexturePath = randomizePlanet();
+		this.planetTexture = new Texture(planettexturePath);
+
+		AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(),
+				planetTexture.getHeight());
+		planet.setDeltaX(-speed);
+		planets.add(planet);
+	}
 
     /**
      * Renders the game screen.
@@ -115,11 +136,10 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
      * @param deltaTime The time elapsed since the last frame.
      */
     @Override
-    public void render(float deltaTime) {
-        if (gameOver) {
-            alienGame.gameOver();
-            return;
-        }
+	public void render(float deltaTime) {
+		if (gameOver) {
+			return;
+		}
 
         elapsedTime += deltaTime;
 
@@ -136,52 +156,57 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private void updateState(float deltaTime) {
         // Apply gravity only after the first SPACE press
         if (!isFirstInput) {
-            ship.setDeltaY(ship.getDeltaY() + GRAVITY * deltaTime);
+            alien.setDeltaY(alien.getDeltaY() + GRAVITY * deltaTime);
         }
 
+        speed += 1.5 * deltaTime;
+
         // Update ship position
-        ship.update(deltaTime);
+        alien.update(deltaTime);
 
         // Update aliens and remove any that go off-screen
         List<AnimatedSprite> toRemove = new ArrayList<>();
-        for (AnimatedSprite alien : aliens) {
-            alien.update(deltaTime);
-            if (alien.getX() < -ALIEN_SIZE) {
-                toRemove.add(alien);
-            }
-        }
+		for (AnimatedSprite planet : planets) {
+			planet.update(deltaTime);
+			if (planet.getX() < -planetTexture.getWidth()) {
+				toRemove.add(planet);
+			}
+		}
 
-        aliens.removeAll(toRemove);
-        for (AnimatedSprite alien : toRemove) {
-            alien.dispose();
-            addAlien(Gdx.graphics.getWidth() + ALIEN_SIZE);
-        }
+		planets.removeAll(toRemove);
+		for (AnimatedSprite planet : toRemove) {
+			planet.dispose();
+			addPlanet(Gdx.graphics.getWidth() + planetTexture.getWidth());
+		}
 
-        alienGame.addPoints((int) (toRemove.size() * speed));
-    }
+		alienGame.addPoints((int) (toRemove.size() * speed));
+	}
 
-    /** Clears the screen and renders all sprites. */
-    private void renderScreen() {
-        ScreenUtils.clear(0.98f, 0.98f, 0.98f, 1);
+      /** Clears the screen and renders all sprites. */
+	private void renderScreen() {
+		// set blue background color
+		Gdx.gl.glClearColor(0.043f, 0.078f, 0.22f, 1.0f);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         batch.begin();
-        ship.draw(batch, elapsedTime);
-        for (AnimatedSprite alien : aliens) {
-            alien.draw(batch, elapsedTime);
+        alien.draw(batch, elapsedTime);
+
+        for (AnimatedSprite planet : planets) {
+            planet.draw(batch, elapsedTime);
         }
+
         batch.end();
     }
 
     /** Checks for collisions between the ship and aliens or the ground. */
     private void checkForGameOver() {
-        for (AnimatedSprite alien : aliens) {
-            if (alien.overlaps(ship)) {
-                gameOver = true;
-                return;
-            }
-        }
+        for (AnimatedSprite planet : planets) {
+			if (planet.overlaps(alien)) {
+				gameOver = true;
+			}
+		}
 
-        if (ship.getY() <= 0) {
+        if (alien.getY() <= 0) {
             gameOver = true;
         }
 
@@ -189,14 +214,14 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
     /** Disposes of all allocated resources when the screen is no longer needed. */
     @Override
-    public void dispose() {
-        batch.dispose();
-        ship.dispose();
-        alienTexture.dispose();
-        for (AnimatedSprite alien : aliens) {
-            alien.dispose();
-        }
-    }
+	public void dispose() {
+		batch.dispose();
+		alien.dispose();
+		planetTexture.dispose();
+		for (AnimatedSprite planet : planets) {
+			planet.dispose();
+		}
+	}
 
     /**
      * Handles key press events. The SPACE key makes the ship bounce upwards.
@@ -210,7 +235,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             if (isFirstInput) {
                 isFirstInput = false;
             }
-            ship.setDeltaY(BOUNCE_VELOCITY);
+            alien.setDeltaY(BOUNCE_VELOCITY);
         }
         return true;
     }
@@ -240,18 +265,21 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         return false;
     }
 
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
 
-    @Override
-    public boolean scrolled(float amountX, float amountY) {
-        return false;
-    }
+	@Override
+	public boolean scrolled(float amountX, float amountY) {
+		return false;
+	}
 
     @Override
     public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-        return false;
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'touchCancelled'");
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'mouseMoved'");
     }
 }
