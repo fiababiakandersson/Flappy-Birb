@@ -210,6 +210,10 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             gameOver = true;
         }
 
+        if (alien.getY() + alien.getHeight() >= Gdx.graphics.getHeight()) {
+            gameOver = true;
+        }
+
     }
 
     /** Disposes of all allocated resources when the screen is no longer needed. */
@@ -273,13 +277,11 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
     @Override
     public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'touchCancelled'");
+       return false;
     }
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'mouseMoved'");
+        return false;
     }
 }
