@@ -140,6 +140,24 @@ public class AnimatedSprite {
         return position.y;
     }
 
+    /**
+     * Get the width of the sprite.
+     *
+     * @return the width of the sprite
+     */
+    public float getWidth() {
+        return position.width;
+    }
+
+    /**
+     * Get the height of the sprite.
+     *
+     * @return the height of the sprite
+     */
+    public float getHeight() {
+        return position.height;
+    }
+
     public float getDeltaX() {
         return deltaX;
     }
