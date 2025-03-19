@@ -38,12 +38,14 @@ public class AnimatedSprite {
      */
     public AnimatedSprite(String filename, int x, int y, int width, int height) {
         texture = new Texture(filename);
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear); // Set texture filtering
         position = new Rectangle(x, y, width, height);
-        regions = createRegions(texture, width, height);
+        regions = new TextureRegion[] { new TextureRegion(texture) }; // Use the entire texture as one region
         animation = new Animation<>(0.15f, regions);
         bounds = null;
     }
-    
+
+
     /**
      * Create a new animated sprite from a texture.
      * 
@@ -59,7 +61,7 @@ public class AnimatedSprite {
     public AnimatedSprite(Texture texture, int x, int y, int width, int height) {
         position = new Rectangle(x, y, width, height);
         regions = createRegions(texture, width, height);
-        animation = new Animation<>(0.15f, regions);
+        animation = new Animation<>(0.2f, regions); // Increase frame duration to 0.2 seconds
         bounds = null;
     }
 
@@ -106,7 +108,7 @@ public class AnimatedSprite {
 
     public void draw(SpriteBatch batch, float elapsedTime) {
         TextureRegion region = animation.getKeyFrame(elapsedTime, true);
-        batch.draw(region, position.getX(), position.getY());
+        batch.draw(region, position.getX(), position.getY(), position.getWidth(), position.getHeight());
     }
 
     /**
