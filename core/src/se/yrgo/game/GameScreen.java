@@ -17,8 +17,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
  * Implements {@link InputProcessor} to handle user input.
  */
 public class GameScreen extends ScreenAdapter implements InputProcessor {
-	private static final int ALIEN_WIDTH = 46;
-	private static final int ALIEN_HEIGHT = 20;
+	private static final int ALIEN_WIDTH = 106;
+	private static final int ALIEN_HEIGHT = 80;
 	private static final float SPEED_START = 50;
 
     private AlienGame alienGame;
@@ -34,8 +34,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
 
     // Gravity and bounce mechanics
-    private static final float GRAVITY = -500f; // Gravity affecting the ship
-    private static final float BOUNCE_VELOCITY = 250f; // Velocity applied on spacebar press
+    private static final float GRAVITY = -600f; // Gravity affecting the ship
+    private static final float BOUNCE_VELOCITY = 400f; // Velocity applied on spacebar press
     private boolean isFirstInput = true; // Prevents gravity before first input
 
     /**
@@ -94,7 +94,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
 		planets.clear();
 		for (int i = 0; i < 10; ++i) {
-			addPlanet(width / 2 + i * 80);
+			addPlanet(width / 4 + i * 100);
 			speed += 1.3;
 		}
 
