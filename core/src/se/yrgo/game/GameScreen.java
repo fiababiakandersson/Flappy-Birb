@@ -70,8 +70,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private void addPlanet() {
         int screenWidth = Gdx.graphics.getWidth();
         int screenHeight = Gdx.graphics.getHeight();
-        int minDistance = 400; // Minimum distance between planets (adjust as needed)
-        int maxAttempts = 100; // Maximum attempts to find a valid position
+        int minDistance = 100; // Minimum distance between planets (adjust as needed)
+        int maxAttempts = 10; // Maximum attempts to find a valid position
         int attempts = 0;
 
         int x, y;
