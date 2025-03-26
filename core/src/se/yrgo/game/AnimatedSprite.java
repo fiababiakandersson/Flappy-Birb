@@ -1,15 +1,13 @@
 package se.yrgo.game;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
+import java.util.*;
+
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.math.*;
 
 /**
- * A sprite that is animated and moves. 
+ * A sprite that is animated and moves.
  * 
  * The sprite keeps track of its size and position and moves when
  * updated. If a bound is given it never moves outside that bound.
@@ -31,10 +29,10 @@ public class AnimatedSprite {
      * and width and used to animate the sprite
      * 
      * @param filename the image file used as texture
-     * @param x the initial x position
-     * @param y the initial y position
-     * @param width the width of the sprite
-     * @param height the height of the sprite
+     * @param x        the initial x position
+     * @param y        the initial y position
+     * @param width    the width of the sprite
+     * @param height   the height of the sprite
      */
     public AnimatedSprite(String filename, int x, int y, int width, int height) {
         texture = new Texture(filename);
@@ -45,7 +43,6 @@ public class AnimatedSprite {
         bounds = null;
     }
 
-
     /**
      * Create a new animated sprite from a texture.
      * 
@@ -53,10 +50,10 @@ public class AnimatedSprite {
      * and width and used to animate the sprite
      * 
      * @param texture the texture to use
-     * @param x the initial x position
-     * @param y the initial y position
-     * @param width the width of the sprite
-     * @param height the height of the sprite
+     * @param x       the initial x position
+     * @param y       the initial y position
+     * @param width   the width of the sprite
+     * @param height  the height of the sprite
      */
     public AnimatedSprite(Texture texture, int x, int y, int width, int height) {
         position = new Rectangle(x, y, width, height);
@@ -92,16 +89,14 @@ public class AnimatedSprite {
         if (bounds != null) {
             if (position.x < bounds.x) {
                 position.x = bounds.x;
-            }
-            else if (position.x + position.width > bounds.x + bounds.width) {
-                position.x =  bounds.x + bounds.width - position.width;
+            } else if (position.x + position.width > bounds.x + bounds.width) {
+                position.x = bounds.x + bounds.width - position.width;
             }
 
             if (position.y < bounds.y) {
                 position.y = bounds.y;
-            }
-            else if (position.y + position.height > bounds.y + bounds.height) {
-                position.y =  bounds.y + bounds.height - position.height;
+            } else if (position.y + position.height > bounds.y + bounds.height) {
+                position.y = bounds.y + bounds.height - position.height;
             }
         }
     }

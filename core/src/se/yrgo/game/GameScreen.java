@@ -8,38 +8,40 @@ import com.badlogic.gdx.Input.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.utils.ScreenUtils;
 
 /**
- * The GameScreen class represents the main gameplay screen where the player controls a ship,
+ * The GameScreen class represents the main gameplay screen where the player
+ * controls a ship,
  * avoids collisions with aliens, and interacts with the game environment.
  * <p>
  * Implements {@link InputProcessor} to handle user input.
  */
 public class GameScreen extends ScreenAdapter implements InputProcessor {
+
+    // alien
+    private AlienGame alienGame;
+    private AnimatedSprite alien;
+    private SpriteBatch batch;
     private static final int ALIEN_WIDTH = 106;
     private static final int ALIEN_HEIGHT = 80;
-    private static final float SPEED_START = 50;
 
-    private AlienGame alienGame;
-    private SpriteBatch batch;
-    private AnimatedSprite alien;
+    // planet
     private List<AnimatedSprite> planets;
-    private boolean gameOver = false;
-    private float elapsedTime;
-    private float speed;
-
     private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
+    private float planetSpawnTimer = 0;
+    private static float planetSpawnInterval = 1.5f; // Time between planet spawns (in seconds)
+    private static int maxPlanetsOnScreen = 5; // Maximum number of planets allowed on screen
 
-    // Gravity and bounce mechanics
+    // gravity and bounce mechanics
     private static final float GRAVITY = -600f; // Gravity affecting the ship
     private static final float BOUNCE_VELOCITY = 400f; // Velocity applied on spacebar press
     private boolean isFirstInput = true; // Prevents gravity before first input
 
-    // Planet spawning control
-    private float planetSpawnTimer = 0;
-    private static final float PLANET_SPAWN_INTERVAL = 1.5f; // Time between planet spawns (in seconds)
-    private static final int MAX_PLANETS_ON_SCREEN = 5; // Maximum number of planets allowed on screen
+    // utils
+    private static final float SPEED_START = 50;
+    private boolean gameOver = false;
+    private float elapsedTime;
+    private float speed;
 
     /**
      * Constructor for the GameScreen.
@@ -59,13 +61,13 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
      * @return String image path of a random planet.
      */
     private String randomizePlanet() {
-        Random random = new Random();
-        int randomPlanetIndex = random.nextInt(planetsArr.length);
+        int randomPlanetIndex = new Random().nextInt(planetsArr.length);
         return planetsArr[randomPlanetIndex];
     }
 
     /**
-     * Adds a planet at a random position, ensuring it doesn't overlap with existing planets.
+     * Adds a planet at a random position, ensuring it doesn't overlap with existing
+     * planets.
      */
     private void addPlanet() {
         int screenWidth = Gdx.graphics.getWidth();
@@ -73,13 +75,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         int minDistance = 100; // Minimum distance between planets (adjust as needed)
         int maxAttempts = 10; // Maximum attempts to find a valid position
         int attempts = 0;
-
         int x, y;
         boolean positionValid;
 
         do {
             // Randomize X and Y coordinates
-            x = ThreadLocalRandom.current().nextInt(screenWidth / 2, screenWidth); // Spawn planets on the right side
+            x = ThreadLocalRandom.current().nextInt(screenWidth - 10, screenWidth); // Spawn planets on the right side
             y = ThreadLocalRandom.current().nextInt(0, screenHeight - ALIEN_HEIGHT);
 
             positionValid = true;
@@ -100,7 +101,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         } while (!positionValid && attempts < maxAttempts);
 
         if (positionValid) {
-            addPlanet(x, y);
+            createPlanet(x, y);
         } else {
             // If no valid position is found after maxAttempts, skip adding this planet
             return;
@@ -113,11 +114,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
      * @param x The X-coordinate of the planet.
      * @param y The Y-coordinate of the planet.
      */
-    private void addPlanet(int x, int y) {
+    private void createPlanet(int x, int y) {
         String planetTexturePath = randomizePlanet();
         Texture planetTexture = new Texture(planetTexturePath);
 
-        AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(), planetTexture.getHeight());
+        AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(),
+                planetTexture.getHeight());
         planet.setDeltaX(-speed); // Move the planet to the left
         planets.add(planet);
     }
@@ -134,15 +136,15 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
      */
     @Override
     public void show() {
-        final int width = Gdx.graphics.getWidth();
-        final int height = Gdx.graphics.getHeight();
+        final int screenWidth = Gdx.graphics.getWidth();
+        final int screenHeight = Gdx.graphics.getHeight();
 
         elapsedTime = 0;
         speed = SPEED_START;
         gameOver = false;
 
-        alien.setBounds(new Rectangle(0, 0, width / 2f, height));
-        alien.setPosition(100, height / 2 - ALIEN_HEIGHT / 2);
+        alien.setBounds(new Rectangle(0, 0, screenWidth / 2f, screenHeight));
+        alien.setPosition(100, screenHeight / 2 - ALIEN_HEIGHT / 2);
 
         // Reset vertical movement and first input flag
         alien.setDeltaY(0);
@@ -168,8 +170,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         elapsedTime += deltaTime;
         planetSpawnTimer += deltaTime;
 
-        // Spawn a new planet if enough time has passed and there are not too many planets on screen
-        if (planetSpawnTimer >= PLANET_SPAWN_INTERVAL && planets.size() < MAX_PLANETS_ON_SCREEN) {
+        // Spawn a new planet if enough time has passed and there are not too many
+        // planets on screen
+        if (planetSpawnTimer >= planetSpawnInterval && planets.size() < maxPlanetsOnScreen) {
             addPlanet();
             planetSpawnTimer = 0; // Reset the timer
         }
@@ -190,7 +193,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             alien.setDeltaY(alien.getDeltaY() + GRAVITY * deltaTime);
         }
 
-        speed += 1.5 * deltaTime;
+        speed += 1.5f * deltaTime; // makes each new planet slightly faster that the last one
 
         // Update ship position
         alien.update(deltaTime);
