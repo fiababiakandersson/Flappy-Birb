@@ -17,8 +17,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
  * Implements {@link InputProcessor} to handle user input.
  */
 public class GameScreen extends ScreenAdapter implements InputProcessor {
-    private static final int ALIEN_WIDTH = 106;
-    private static final int ALIEN_HEIGHT = 80;
+    private static final int ALIEN_WIDTH = 130;
+    private static final int ALIEN_HEIGHT = 100;
     private static final float SPEED_START = 150;
 
     private AlienGame alienGame;
@@ -33,8 +33,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
     private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
 
-    private static final float GRAVITY = -800f;
-    private static final float BOUNCE_VELOCITY = 350f;
+    private static final float GRAVITY = -2700f;
+    private static final float BOUNCE_VELOCITY = 650f;
     private boolean isFirstInput = true;
 
     private float planetSpawnTimer = 0;
@@ -61,7 +61,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private void addPlanet() {
         int screenWidth = Gdx.graphics.getWidth();
         int screenHeight = Gdx.graphics.getHeight();
-        int minDistance = 400;
+        int minDistance = 50; // originally 100
         int maxAttempts = 10;
         int attempts = 0;
 
@@ -151,7 +151,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             alien.setDeltaY(alien.getDeltaY() + GRAVITY * deltaTime);
         }
 
-        speed += 1.7 * deltaTime;
+        speed += 50 * deltaTime; // 1.7 originally
 
         alien.update(deltaTime);
 
@@ -168,6 +168,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             planet.dispose();
         }
 
+        // counts passed planets
         alienGame.addPoints(toRemove.size());
     }
 
@@ -182,9 +183,11 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             planet.draw(batch, elapsedTime);
         }
 
-        String scoreText = "Score: " + alienGame.getPoints();
-        font.draw(batch, scoreText, 20, Gdx.graphics.getHeight() - 20);
-
+        // added
+        font.draw(batch, "Score: " + alienGame.getPoints(),
+                20, Gdx.graphics.getHeight() - 20);
+        font.draw(batch, "High Score: " + alienGame.getHighScore(),
+                20, Gdx.graphics.getHeight() - 50);
         batch.end();
     }
 
@@ -203,8 +206,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             gameOver = true;
         }
 
+        // added/modified
         if (gameOver) {
-            alienGame.setScreen(new GameOverScreen(alienGame));
+            alienGame.gameOver();
         }
     }
 
