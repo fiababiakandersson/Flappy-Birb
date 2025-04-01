@@ -61,8 +61,10 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private void addPlanet() {
         int screenWidth = Gdx.graphics.getWidth();
         int screenHeight = Gdx.graphics.getHeight();
+
         int minDistance = 50; // originally 100
         int maxAttempts = 10;
+
         int attempts = 0;
 
         int x, y;
