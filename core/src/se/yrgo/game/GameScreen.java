@@ -2,7 +2,6 @@ package se.yrgo.game;
 
 import java.util.*;
 import java.util.concurrent.*;
-
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input.*;
 import com.badlogic.gdx.graphics.*;
@@ -10,21 +9,16 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-/**
- * The GameScreen class represents the main gameplay screen where the player controls a ship,
- * avoids collisions with aliens, and interacts with the game environment.
- * <p>
- * Implements {@link InputProcessor} to handle user input.
- */
 public class GameScreen extends ScreenAdapter implements InputProcessor {
-    private static final int ALIEN_WIDTH = 106;
-    private static final int ALIEN_HEIGHT = 80;
-    private static final float SPEED_START = 150;
+    private static final int ALIEN_WIDTH = 130;
+    private static final int ALIEN_HEIGHT = 100;
+    private static final float SPEED_START = 130;
 
     private AlienGame alienGame;
     private SpriteBatch batch;
     private AnimatedSprite alien;
     private List<AnimatedSprite> planets;
+    private List<AnimatedSprite> backgroundStars; // For background stars
     private boolean gameOver = false;
     private float elapsedTime;
     private float speed;
@@ -33,23 +27,45 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
     private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
 
-    private static final float GRAVITY = -800f;
-    private static final float BOUNCE_VELOCITY = 350f;
+    private static final float GRAVITY = -2700f;
+    private static final float BOUNCE_VELOCITY = 650f;
     private boolean isFirstInput = true;
 
     private float planetSpawnTimer = 0;
     private static final float PLANET_SPAWN_INTERVAL = 1.5f;
     private static final int MAX_PLANETS_ON_SCREEN = 5;
+    private static final int STAR_COUNT = 100; // Number of background stars
+    private static final float STAR_SPEED = -90f; // Background stars move slower than planets
 
     public GameScreen(AlienGame alienGame) {
         this.alienGame = alienGame;
         this.batch = new SpriteBatch();
         this.alien = new AnimatedSprite("alien.png", 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
         this.planets = new ArrayList<>();
+        this.backgroundStars = new ArrayList<>();
         this.font = new BitmapFont();
         this.glyphLayout = new GlyphLayout();
         font.getData().setScale(2);
         font.setColor(Color.WHITE);
+
+        initializeBackgroundStars();
+    }
+
+    private void initializeBackgroundStars() {
+        Random random = new Random();
+        int screenWidth = Gdx.graphics.getWidth();
+        int screenHeight = Gdx.graphics.getHeight();
+
+        for (int i = 0; i < STAR_COUNT; i++) {
+            int x = random.nextInt(screenWidth);
+            int y = random.nextInt(screenHeight);
+            int size = random.nextInt(10) + 2; // Random size between 1 and 3 pixels
+
+            // Create star (using stars.png texture)
+            AnimatedSprite star = new AnimatedSprite("stars.png", x, y, size, size);
+            star.setDeltaX(STAR_SPEED); // Stars move slowly to the left
+            backgroundStars.add(star);
+        }
     }
 
     private String randomizePlanet() {
@@ -61,7 +77,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private void addPlanet() {
         int screenWidth = Gdx.graphics.getWidth();
         int screenHeight = Gdx.graphics.getHeight();
-        int minDistance = 400;
+        int minDistance = 50;
         int maxAttempts = 10;
         int attempts = 0;
 
@@ -151,10 +167,11 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             alien.setDeltaY(alien.getDeltaY() + GRAVITY * deltaTime);
         }
 
-        speed += 1.7 * deltaTime;
+        speed += 50 * deltaTime;
 
         alien.update(deltaTime);
 
+        // Update planets
         List<AnimatedSprite> toRemove = new ArrayList<>();
         for (AnimatedSprite planet : planets) {
             planet.update(deltaTime);
@@ -162,10 +179,19 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
                 toRemove.add(planet);
             }
         }
-
         planets.removeAll(toRemove);
         for (AnimatedSprite planet : toRemove) {
             planet.dispose();
+        }
+
+        // Update background stars
+        for (AnimatedSprite star : backgroundStars) {
+            star.update(deltaTime);
+            // Wrap stars around when they go off screen
+            if (star.getX() < -star.getWidth()) {
+                star.setPosition(Gdx.graphics.getWidth(),
+                        ThreadLocalRandom.current().nextInt(0, Gdx.graphics.getHeight()));
+            }
         }
 
         alienGame.addPoints(toRemove.size());
@@ -176,15 +202,23 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         batch.begin();
-        alien.draw(batch, elapsedTime);
 
+        // Draw background stars first
+        for (AnimatedSprite star : backgroundStars) {
+            star.draw(batch, elapsedTime);
+        }
+
+        // Draw game objects
+        alien.draw(batch, elapsedTime);
         for (AnimatedSprite planet : planets) {
             planet.draw(batch, elapsedTime);
         }
 
-        String scoreText = "Score: " + alienGame.getPoints();
-        font.draw(batch, scoreText, 20, Gdx.graphics.getHeight() - 20);
-
+        // Draw UI
+        font.draw(batch, "Score: " + alienGame.getPoints(),
+                20, Gdx.graphics.getHeight() - 20);
+        font.draw(batch, "High Score: " + alienGame.getHighScore(),
+                20, Gdx.graphics.getHeight() - 50);
         batch.end();
     }
 
@@ -204,7 +238,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         }
 
         if (gameOver) {
-            alienGame.setScreen(new GameOverScreen(alienGame));
+            alienGame.gameOver();
         }
     }
 
@@ -216,8 +250,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         for (AnimatedSprite planet : planets) {
             planet.dispose();
         }
+        for (AnimatedSprite star : backgroundStars) {
+            star.dispose();
+        }
     }
 
+    // Input handling methods remain unchanged...
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Keys.SPACE) {
