@@ -13,9 +13,16 @@ public class AlienGame extends Game {
 	private GameOverScreen gameOverScreen;
 
 	private int points;
+	// added
+	private int highScore;
+	private Preferences prefs;
 
 	@Override
 	public void create() {
+		// added
+		prefs = Gdx.app.getPreferences("AlienGamePrefs");
+		highScore = prefs.getInteger("highScore", 0);
+
 		gameScreen = new GameScreen(this);
 		gameOverScreen = new GameOverScreen(this);
 		newGame();
@@ -28,6 +35,12 @@ public class AlienGame extends Game {
 
 	public void addPoints(int points) {
 		this.points += points;
+		// added
+		if (this.points > highScore) {
+			highScore = this.points;
+			prefs.putInteger("highScore", highScore);
+			prefs.flush(); // Save to disk
+		}
 	}
 
 	public int getPoints() {
@@ -39,7 +52,12 @@ public class AlienGame extends Game {
 		setScreen(gameScreen);
 	}
 
-	// public void gameOver() {
-	// setScreen(gameOverScreen);
-	// }
+	// added
+	public int getHighScore() {
+		return highScore;
+	}
+
+	 public void gameOver() {
+	 setScreen(gameOverScreen);
+	}
 }
