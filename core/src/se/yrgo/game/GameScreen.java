@@ -2,12 +2,12 @@ package se.yrgo.game;
 
 import java.util.*;
 import java.util.concurrent.*;
+
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.utils.ScreenUtils;
 
 public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static final int ALIEN_WIDTH = 130;
@@ -26,7 +26,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static final int EASY_MAX_PLANETS = 4;
     private static final int MEDIUM_MAX_PLANETS = 5;
     private static final int HARD_MAX_PLANETS = 6;
-
 
     private AlienGame alienGame;
     private SpriteBatch batch;
@@ -127,7 +126,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         String planetTexturePath = randomizePlanet();
         Texture planetTexture = new Texture(planetTexturePath);
 
-        AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(), planetTexture.getHeight());
+        AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(),
+                planetTexture.getHeight());
         planet.setDeltaX(-speed);
         planets.add(planet);
     }
@@ -302,17 +302,21 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     }
 
     @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (isFirstInput) {
+            isFirstInput = false;
+        }
+        alien.setDeltaY(BOUNCE_VELOCITY);
+        return true;
+    }
+
+    @Override
     public boolean keyUp(int keycode) {
         return false;
     }
 
     @Override
     public boolean keyTyped(char character) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         return false;
     }
 
