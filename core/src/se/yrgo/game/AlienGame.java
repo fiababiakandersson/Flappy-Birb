@@ -9,25 +9,48 @@ import com.badlogic.gdx.*;
  * menus, different game modes, end screens etc.
  */
 public class AlienGame extends Game {
+	public enum Difficulty {
+		EASY, MEDIUM, HARD
+	}
 	private GameScreen gameScreen;
 	private GameOverScreen gameOverScreen;
+	private MenuScreen menuScreen;
 
 	private int points;
+	private int highScore;
+	private Preferences prefs;
+	private Difficulty difficulty = Difficulty.MEDIUM;
+
 
 	@Override
 	public void create() {
+		// added
+		prefs = Gdx.app.getPreferences("AlienGamePrefs");
+		highScore = prefs.getInteger("highScore", 0);
+
 		gameScreen = new GameScreen(this);
 		gameOverScreen = new GameOverScreen(this);
-		newGame();
+		menuScreen = new MenuScreen(this);
+
+		setScreen(menuScreen);
+//		newGame();
 	}
 
 	@Override
 	public void dispose() {
 		gameScreen.dispose();
+		gameOverScreen.dispose();
+		menuScreen.dispose();
 	}
 
 	public void addPoints(int points) {
 		this.points += points;
+		// added
+		if (this.points > highScore) {
+			highScore = this.points;
+			prefs.putInteger("highScore", highScore);
+			prefs.flush(); // Save to disk
+		}
 	}
 
 	public int getPoints() {
@@ -39,7 +62,20 @@ public class AlienGame extends Game {
 		setScreen(gameScreen);
 	}
 
-	// public void gameOver() {
-	// setScreen(gameOverScreen);
-	// }
+	// added
+	public int getHighScore() {
+		return highScore;
+	}
+
+	 public void gameOver() {
+	 setScreen(gameOverScreen);
+	}
+
+	public void setDifficulty(Difficulty difficulty) {
+		this.difficulty = difficulty;
+	}
+
+	public Difficulty getDifficulty() {
+		return difficulty;
+	}
 }

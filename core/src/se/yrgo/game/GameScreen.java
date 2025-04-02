@@ -2,7 +2,6 @@ package se.yrgo.game;
 
 import java.util.*;
 import java.util.concurrent.*;
-
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input.*;
 import com.badlogic.gdx.graphics.*;
@@ -10,86 +9,106 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-/**
- * The GameScreen class represents the main gameplay screen where the player controls a ship,
- * avoids collisions with aliens, and interacts with the game environment.
- * <p>
- * Implements {@link InputProcessor} to handle user input.
- */
 public class GameScreen extends ScreenAdapter implements InputProcessor {
-    private static final int ALIEN_WIDTH = 106;
-    private static final int ALIEN_HEIGHT = 80;
-    private static final float SPEED_START = 50;
+    private static final int ALIEN_WIDTH = 130;
+    private static final int ALIEN_HEIGHT = 100;
+    // private static final float SPEED_START = 130;
+
+    // Difficulty-based constants
+    private static final float EASY_SPEED_START = 100f;
+    private static final float MEDIUM_SPEED_START = 130f;
+    private static final float HARD_SPEED_START = 170f;
+
+    private static final float EASY_PLANET_SPAWN_INTERVAL = 2.0f;
+    private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 1.5f;
+    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
+
+    private static final int EASY_MAX_PLANETS = 4;
+    private static final int MEDIUM_MAX_PLANETS = 5;
+    private static final int HARD_MAX_PLANETS = 6;
+
 
     private AlienGame alienGame;
     private SpriteBatch batch;
     private AnimatedSprite alien;
     private List<AnimatedSprite> planets;
+    private List<AnimatedSprite> backgroundStars; // For background stars
+    private BitmapFont font;
+    private GlyphLayout glyphLayout;
+    private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
+
+    private static final float GRAVITY = -2700f;
+    private static final float BOUNCE_VELOCITY = 650f;
+    private static final int STAR_COUNT = 100; // Number of background stars
+    private static final float STAR_SPEED = -90f; // Background stars move slower than planets
+
     private boolean gameOver = false;
     private float elapsedTime;
     private float speed;
-
-    private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
-
-    // Gravity and bounce mechanics
-    private static final float GRAVITY = -600f; // Gravity affecting the ship
-    private static final float BOUNCE_VELOCITY = 400f; // Velocity applied on spacebar press
-    private boolean isFirstInput = true; // Prevents gravity before first input
-
-    // Planet spawning control
+    private boolean isFirstInput = true;
     private float planetSpawnTimer = 0;
-    private static final float PLANET_SPAWN_INTERVAL = 1.5f; // Time between planet spawns (in seconds)
-    private static final int MAX_PLANETS_ON_SCREEN = 5; // Maximum number of planets allowed on screen
+    private static float PLANET_SPAWN_INTERVAL;
+    private static int MAX_PLANETS_ON_SCREEN;
 
-    /**
-     * Constructor for the GameScreen.
-     *
-     * @param alienGame The main game instance to allow screen transitions.
-     */
     public GameScreen(AlienGame alienGame) {
         this.alienGame = alienGame;
         this.batch = new SpriteBatch();
         this.alien = new AnimatedSprite("alien.png", 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
         this.planets = new ArrayList<>();
+        this.backgroundStars = new ArrayList<>();
+        this.font = new BitmapFont();
+        this.glyphLayout = new GlyphLayout();
+        font.getData().setScale(2);
+        font.setColor(Color.WHITE);
+
+        initializeBackgroundStars();
     }
 
-    /**
-     * Get random planet image URL, based on planetsArr.
-     *
-     * @return String image path of a random planet.
-     */
+    private void initializeBackgroundStars() {
+        Random random = new Random();
+        int screenWidth = Gdx.graphics.getWidth();
+        int screenHeight = Gdx.graphics.getHeight();
+
+        for (int i = 0; i < STAR_COUNT; i++) {
+            int x = random.nextInt(screenWidth);
+            int y = random.nextInt(screenHeight);
+            int size = random.nextInt(10) + 2; // Random size between 1 and 3 pixels
+
+            // Create star (using stars.png texture)
+            AnimatedSprite star = new AnimatedSprite("stars.png", x, y, size, size);
+            star.setDeltaX(STAR_SPEED); // Stars move slowly to the left
+            backgroundStars.add(star);
+        }
+    }
+
     private String randomizePlanet() {
         Random random = new Random();
         int randomPlanetIndex = random.nextInt(planetsArr.length);
         return planetsArr[randomPlanetIndex];
     }
 
-    /**
-     * Adds a planet at a random position, ensuring it doesn't overlap with existing planets.
-     */
     private void addPlanet() {
         int screenWidth = Gdx.graphics.getWidth();
         int screenHeight = Gdx.graphics.getHeight();
-        int minDistance = 100; // Minimum distance between planets (adjust as needed)
-        int maxAttempts = 10; // Maximum attempts to find a valid position
+
+        int minDistance = 50;
+        int maxAttempts = 10;
+
         int attempts = 0;
 
         int x, y;
         boolean positionValid;
 
         do {
-            // Randomize X and Y coordinates
-            x = ThreadLocalRandom.current().nextInt(screenWidth / 2, screenWidth); // Spawn planets on the right side
+            x = ThreadLocalRandom.current().nextInt(screenWidth - 10, screenWidth);
             y = ThreadLocalRandom.current().nextInt(0, screenHeight - ALIEN_HEIGHT);
 
             positionValid = true;
 
-            // Check if the new planet overlaps with any existing planet
             for (AnimatedSprite planet : planets) {
                 float distanceX = Math.abs(planet.getX() - x);
                 float distanceY = Math.abs(planet.getY() - y);
 
-                // Check if the distance is too small in either X or Y direction
                 if (distanceX < minDistance && distanceY < minDistance) {
                     positionValid = false;
                     break;
@@ -101,64 +120,63 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
         if (positionValid) {
             addPlanet(x, y);
-        } else {
-            // If no valid position is found after maxAttempts, skip adding this planet
-            return;
         }
     }
 
-    /**
-     * Creates a planet sprite at the specified coordinates and adds it to the list.
-     *
-     * @param x The X-coordinate of the planet.
-     * @param y The Y-coordinate of the planet.
-     */
     private void addPlanet(int x, int y) {
         String planetTexturePath = randomizePlanet();
         Texture planetTexture = new Texture(planetTexturePath);
 
         AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(), planetTexture.getHeight());
-        planet.setDeltaX(-speed); // Move the planet to the left
+        planet.setDeltaX(-speed);
         planets.add(planet);
     }
 
-    /** Called when this screen is hidden. Removes the input processor. */
     @Override
     public void hide() {
         Gdx.input.setInputProcessor(null);
     }
 
-    /**
-     * Initializes the game screen when it is displayed.
-     * Resets game variables and positions the ship and aliens.
-     */
     @Override
     public void show() {
         final int width = Gdx.graphics.getWidth();
         final int height = Gdx.graphics.getHeight();
 
         elapsedTime = 0;
-        speed = SPEED_START;
+        // speed = SPEED_START;
         gameOver = false;
+
+        // Set difficulty-based parameters
+        switch (alienGame.getDifficulty()) {
+            case EASY:
+                speed = EASY_SPEED_START;
+                PLANET_SPAWN_INTERVAL = EASY_PLANET_SPAWN_INTERVAL;
+                MAX_PLANETS_ON_SCREEN = EASY_MAX_PLANETS;
+                break;
+            case MEDIUM:
+                speed = MEDIUM_SPEED_START;
+                PLANET_SPAWN_INTERVAL = MEDIUM_PLANET_SPAWN_INTERVAL;
+                MAX_PLANETS_ON_SCREEN = MEDIUM_MAX_PLANETS;
+                break;
+            case HARD:
+                speed = HARD_SPEED_START;
+                PLANET_SPAWN_INTERVAL = HARD_PLANET_SPAWN_INTERVAL;
+                MAX_PLANETS_ON_SCREEN = HARD_MAX_PLANETS;
+                break;
+        }
 
         alien.setBounds(new Rectangle(0, 0, width / 2f, height));
         alien.setPosition(100, height / 2 - ALIEN_HEIGHT / 2);
 
-        // Reset vertical movement and first input flag
         alien.setDeltaY(0);
         isFirstInput = true;
 
         planets.clear();
-        planetSpawnTimer = 0; // Reset the planet spawn timer
+        planetSpawnTimer = 0;
 
         Gdx.input.setInputProcessor(this);
     }
 
-    /**
-     * Renders the game screen.
-     *
-     * @param deltaTime The time elapsed since the last frame.
-     */
     @Override
     public void render(float deltaTime) {
         if (gameOver) {
@@ -168,10 +186,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         elapsedTime += deltaTime;
         planetSpawnTimer += deltaTime;
 
-        // Spawn a new planet if enough time has passed and there are not too many planets on screen
         if (planetSpawnTimer >= PLANET_SPAWN_INTERVAL && planets.size() < MAX_PLANETS_ON_SCREEN) {
             addPlanet();
-            planetSpawnTimer = 0; // Reset the timer
+            planetSpawnTimer = 0;
         }
 
         updateState(deltaTime);
@@ -179,23 +196,16 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         checkForGameOver();
     }
 
-    /**
-     * Updates the game state, including ship movement and alien behavior.
-     *
-     * @param deltaTime The time elapsed since the last frame.
-     */
     private void updateState(float deltaTime) {
-        // Apply gravity only after the first SPACE press
         if (!isFirstInput) {
             alien.setDeltaY(alien.getDeltaY() + GRAVITY * deltaTime);
         }
 
-        speed += 1.5 * deltaTime;
+        speed += 20 * deltaTime;
 
-        // Update ship position
         alien.update(deltaTime);
 
-        // Update aliens and remove any that go off-screen
+        // Update planets
         List<AnimatedSprite> toRemove = new ArrayList<>();
         for (AnimatedSprite planet : planets) {
             planet.update(deltaTime);
@@ -203,32 +213,49 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
                 toRemove.add(planet);
             }
         }
-
         planets.removeAll(toRemove);
         for (AnimatedSprite planet : toRemove) {
             planet.dispose();
         }
 
-        alienGame.addPoints((int) (toRemove.size() * speed));
+        // Update background stars
+        for (AnimatedSprite star : backgroundStars) {
+            star.update(deltaTime);
+            // Wrap stars around when they go off screen
+            if (star.getX() < -star.getWidth()) {
+                star.setPosition(Gdx.graphics.getWidth(),
+                        ThreadLocalRandom.current().nextInt(0, Gdx.graphics.getHeight()));
+            }
+        }
+
+        alienGame.addPoints(toRemove.size());
     }
 
-    /** Clears the screen and renders all sprites. */
     private void renderScreen() {
-        // Set blue background color
         Gdx.gl.glClearColor(0.043f, 0.078f, 0.22f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         batch.begin();
-        alien.draw(batch, elapsedTime);
 
+        // Draw background stars first
+        for (AnimatedSprite star : backgroundStars) {
+            star.draw(batch, elapsedTime);
+        }
+
+        // Draw game objects
+        alien.draw(batch, elapsedTime);
         for (AnimatedSprite planet : planets) {
             planet.draw(batch, elapsedTime);
         }
 
+        // Draw UI
+        font.draw(batch, "Score: " + alienGame.getPoints(),
+                20, Gdx.graphics.getHeight() - 20);
+        font.draw(batch, "High Score: " + alienGame.getHighScore(),
+                20, Gdx.graphics.getHeight() - 50);
         batch.end();
     }
 
-    /** Checks for collisions between the ship and aliens or the ground. */
     private void checkForGameOver() {
         for (AnimatedSprite planet : planets) {
             if (planet.overlaps(alien)) {
@@ -243,24 +270,26 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         if (alien.getY() + alien.getHeight() >= Gdx.graphics.getHeight()) {
             gameOver = true;
         }
+
+        if (gameOver) {
+            alienGame.gameOver();
+        }
     }
 
-    /** Disposes of all allocated resources when the screen is no longer needed. */
     @Override
     public void dispose() {
         batch.dispose();
         alien.dispose();
+        font.dispose();
         for (AnimatedSprite planet : planets) {
             planet.dispose();
         }
+        for (AnimatedSprite star : backgroundStars) {
+            star.dispose();
+        }
     }
 
-    /**
-     * Handles key press events. The SPACE key makes the ship bounce upwards.
-     *
-     * @param keycode The key that was pressed.
-     * @return Always returns true.
-     */
+    // Input handling methods remain unchanged...
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Keys.SPACE) {
