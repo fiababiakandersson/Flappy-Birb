@@ -33,7 +33,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private List<AnimatedSprite> planets;
     private List<AnimatedSprite> backgroundStars; // For background stars
     private BitmapFont font;
-    private GlyphLayout glyphLayout;
     private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
 
     private static final float GRAVITY = -2700f;
