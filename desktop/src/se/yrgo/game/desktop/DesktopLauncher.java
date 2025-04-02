@@ -8,7 +8,10 @@ public class DesktopLauncher {
 	public static void main(String[] arg) {
 		// this is where we configure how our program starts on the desktop
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		config.setWindowedMode(750, 1150);
+		config.setWindowedMode(800, 1200);
+		config.setTitle("Alien Game - Avoid the Planets!");
+		config.setForegroundFPS(60);
+		config.useVsync(true);
 		new Lwjgl3Application(new AlienGame(), config);
 	}
 }

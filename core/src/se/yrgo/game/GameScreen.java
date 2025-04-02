@@ -12,30 +12,43 @@ import com.badlogic.gdx.utils.ScreenUtils;
 public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static final int ALIEN_WIDTH = 130;
     private static final int ALIEN_HEIGHT = 100;
-    private static final float SPEED_START = 130;
+    // private static final float SPEED_START = 130;
+
+    // Difficulty-based constants
+    private static final float EASY_SPEED_START = 100f;
+    private static final float MEDIUM_SPEED_START = 130f;
+    private static final float HARD_SPEED_START = 170f;
+
+    private static final float EASY_PLANET_SPAWN_INTERVAL = 2.0f;
+    private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 1.5f;
+    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
+
+    private static final int EASY_MAX_PLANETS = 4;
+    private static final int MEDIUM_MAX_PLANETS = 5;
+    private static final int HARD_MAX_PLANETS = 6;
+
 
     private AlienGame alienGame;
     private SpriteBatch batch;
     private AnimatedSprite alien;
     private List<AnimatedSprite> planets;
     private List<AnimatedSprite> backgroundStars; // For background stars
-    private boolean gameOver = false;
-    private float elapsedTime;
-    private float speed;
     private BitmapFont font;
     private GlyphLayout glyphLayout;
-
     private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
 
     private static final float GRAVITY = -2700f;
     private static final float BOUNCE_VELOCITY = 650f;
-    private boolean isFirstInput = true;
-
-    private float planetSpawnTimer = 0;
-    private static final float PLANET_SPAWN_INTERVAL = 1.5f;
-    private static final int MAX_PLANETS_ON_SCREEN = 5;
     private static final int STAR_COUNT = 100; // Number of background stars
     private static final float STAR_SPEED = -90f; // Background stars move slower than planets
+
+    private boolean gameOver = false;
+    private float elapsedTime;
+    private float speed;
+    private boolean isFirstInput = true;
+    private float planetSpawnTimer = 0;
+    private static float PLANET_SPAWN_INTERVAL;
+    private static int MAX_PLANETS_ON_SCREEN;
 
     public GameScreen(AlienGame alienGame) {
         this.alienGame = alienGame;
@@ -128,8 +141,27 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         final int height = Gdx.graphics.getHeight();
 
         elapsedTime = 0;
-        speed = SPEED_START;
+        // speed = SPEED_START;
         gameOver = false;
+
+        // Set difficulty-based parameters
+        switch (alienGame.getDifficulty()) {
+            case EASY:
+                speed = EASY_SPEED_START;
+                PLANET_SPAWN_INTERVAL = EASY_PLANET_SPAWN_INTERVAL;
+                MAX_PLANETS_ON_SCREEN = EASY_MAX_PLANETS;
+                break;
+            case MEDIUM:
+                speed = MEDIUM_SPEED_START;
+                PLANET_SPAWN_INTERVAL = MEDIUM_PLANET_SPAWN_INTERVAL;
+                MAX_PLANETS_ON_SCREEN = MEDIUM_MAX_PLANETS;
+                break;
+            case HARD:
+                speed = HARD_SPEED_START;
+                PLANET_SPAWN_INTERVAL = HARD_PLANET_SPAWN_INTERVAL;
+                MAX_PLANETS_ON_SCREEN = HARD_MAX_PLANETS;
+                break;
+        }
 
         alien.setBounds(new Rectangle(0, 0, width / 2f, height));
         alien.setPosition(100, height / 2 - ALIEN_HEIGHT / 2);
@@ -167,7 +199,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             alien.setDeltaY(alien.getDeltaY() + GRAVITY * deltaTime);
         }
 
-        speed += 50 * deltaTime;
+        speed += 20 * deltaTime;
 
         alien.update(deltaTime);
 
