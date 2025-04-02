@@ -55,7 +55,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         this.planets = new ArrayList<>();
         this.backgroundStars = new ArrayList<>();
         this.font = new BitmapFont();
-        this.glyphLayout = new GlyphLayout();
         font.getData().setScale(2);
         font.setColor(Color.WHITE);
 
