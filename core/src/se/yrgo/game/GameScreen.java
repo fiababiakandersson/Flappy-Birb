@@ -5,6 +5,7 @@ import java.util.concurrent.*;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input.*;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
@@ -48,6 +49,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private float planetSpawnTimer = 0;
     private static float PLANET_SPAWN_INTERVAL;
     private static int MAX_PLANETS_ON_SCREEN;
+    private Music gamePlayMusic = Gdx.audio.newMusic(Gdx.files.internal("music/1.MainTheme-320bit(chosic.com).mp3"));
+    private Music jumpingMusic = Gdx.audio.newMusic(Gdx.files.internal("music/retro-jump.mp3"));
+    private Texture stars =  new Texture(Gdx.files.internal("extrasmallstars.png"));
 
     public GameScreen(AlienGame alienGame) {
         this.alienGame = alienGame;
@@ -74,7 +78,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             int size = random.nextInt(10) + 2; // Random size between 1 and 3 pixels
 
             // Create star (using stars.png texture)
-            AnimatedSprite star = new AnimatedSprite("stars.png", x, y, size, size);
+            AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42, 64
             star.setDeltaX(STAR_SPEED); // Stars move slowly to the left
             backgroundStars.add(star);
         }
@@ -183,6 +187,10 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             return;
         }
 
+        if(!gamePlayMusic.isPlaying() && !gameOver){
+            gamePlayMusic.play();
+        }
+
         elapsedTime += deltaTime;
         planetSpawnTimer += deltaTime;
 
@@ -264,6 +272,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         }
 
         if (alien.getY() <= 0) {
+            gamePlayMusic.pause();
             gameOver = true;
         }
 
@@ -272,6 +281,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         }
 
         if (gameOver) {
+            gamePlayMusic.stop();
             alienGame.gameOver();
         }
     }
@@ -296,6 +306,10 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             if (isFirstInput) {
                 isFirstInput = false;
             }
+
+          
+            jumpingMusic.play();
+            
             alien.setDeltaY(BOUNCE_VELOCITY);
         }
         return true;
@@ -306,6 +320,14 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         if (isFirstInput) {
             isFirstInput = false;
         }
+
+        if(!jumpingMusic.isPlaying()){
+            jumpingMusic.play();
+        }
+        else{
+            jumpingMusic.play();
+        }
+        
         alien.setDeltaY(BOUNCE_VELOCITY);
         return true;
     }

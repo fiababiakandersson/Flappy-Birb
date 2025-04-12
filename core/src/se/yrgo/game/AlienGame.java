@@ -67,7 +67,7 @@ public class AlienGame extends Game {
 		return highScore;
 	}
 
-	 public void gameOver() {
+	public void gameOver() {
 	 setScreen(gameOverScreen);
 	}
 
