@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.*;
 public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static final int ALIEN_WIDTH = 130;
     private static final int ALIEN_HEIGHT = 100;
-    // private static final float SPEED_START = 130;
 
     // Difficulty-based constants
     private static final float EASY_SPEED_START = 100f;
@@ -34,7 +33,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private List<AnimatedSprite> planets;
     private List<AnimatedSprite> backgroundStars; // For background stars
     private BitmapFont font;
-    private GlyphLayout glyphLayout;
     private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
 
     private static final float GRAVITY = -2700f;
@@ -53,14 +51,22 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private Music jumpingMusic = Gdx.audio.newMusic(Gdx.files.internal("music/retro-jump.mp3"));
     private Texture stars =  new Texture(Gdx.files.internal("extrasmallstars.png"));
 
+    // New textures for normal and jump state
+    private Texture alienNormalTexture;
+    private Texture alienJumpTexture;
+
     public GameScreen(AlienGame alienGame) {
         this.alienGame = alienGame;
         this.batch = new SpriteBatch();
-        this.alien = new AnimatedSprite("alien.png", 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
+        // Load both textures
+        alienNormalTexture = new Texture("alien.png");
+        alienJumpTexture = new Texture("alienJumping.png"); // Make sure this image is in your assets folder
+
+        // Initialize alien with the normal texture
+        this.alien = new AnimatedSprite(alienNormalTexture, 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
         this.planets = new ArrayList<>();
         this.backgroundStars = new ArrayList<>();
         this.font = new BitmapFont();
-        this.glyphLayout = new GlyphLayout();
         font.getData().setScale(2);
         font.setColor(Color.WHITE);
 
@@ -75,7 +81,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         for (int i = 0; i < STAR_COUNT; i++) {
             int x = random.nextInt(screenWidth);
             int y = random.nextInt(screenHeight);
-            int size = random.nextInt(10) + 2; // Random size between 1 and 3 pixels
+            int size = random.nextInt(10) + 2; // Random size between 2 and 11 pixels
 
             // Create star (using stars.png texture)
             AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42, 64
@@ -147,7 +153,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         final int height = Gdx.graphics.getHeight();
 
         elapsedTime = 0;
-        // speed = SPEED_START;
         gameOver = false;
 
         // Set difficulty-based parameters
@@ -211,6 +216,11 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
         speed += 20 * deltaTime;
 
+        // When falling, revert to the normal texture.
+        if (alien.getDeltaY() <= 0) {
+            alien.setTexture(alienNormalTexture);
+        }
+
         alien.update(deltaTime);
 
         // Update planets
@@ -257,10 +267,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         }
 
         // Draw UI
-        font.draw(batch, "Score: " + alienGame.getPoints(),
-                20, Gdx.graphics.getHeight() - 20);
-        font.draw(batch, "High Score: " + alienGame.getHighScore(),
-                20, Gdx.graphics.getHeight() - 50);
+        font.draw(batch, "Score: " + alienGame.getPoints(), 20, Gdx.graphics.getHeight() - 20);
+        font.draw(batch, "High Score: " + alienGame.getHighScore(), 20, Gdx.graphics.getHeight() - 50);
         batch.end();
     }
 
@@ -290,6 +298,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     public void dispose() {
         batch.dispose();
         alien.dispose();
+        alienNormalTexture.dispose();
+        alienJumpTexture.dispose();
         font.dispose();
         for (AnimatedSprite planet : planets) {
             planet.dispose();
@@ -299,7 +309,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         }
     }
 
-    // Input handling methods remain unchanged...
+    // Input handling methods
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Keys.SPACE) {
@@ -311,6 +321,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             jumpingMusic.play();
             
             alien.setDeltaY(BOUNCE_VELOCITY);
+            // Switch to the jump texture when the alien jumps
+            alien.setTexture(alienJumpTexture);
         }
         return true;
     }
@@ -329,6 +341,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         }
         
         alien.setDeltaY(BOUNCE_VELOCITY);
+        // Switch to the jump texture when the alien jumps
+        alien.setTexture(alienJumpTexture);
         return true;
     }
 

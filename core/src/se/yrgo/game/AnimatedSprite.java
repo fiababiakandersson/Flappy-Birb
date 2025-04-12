@@ -1,20 +1,11 @@
 package se.yrgo.game;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
+import java.util.*;
 
-/**
- * A sprite that is animated and moves. 
- * 
- * The sprite keeps track of its size and position and moves when
- * updated. If a bound is given it never moves outside that bound.
- * 
- */
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.math.*;
+
 public class AnimatedSprite {
     private Texture texture;
     private TextureRegion[] regions;
@@ -26,45 +17,30 @@ public class AnimatedSprite {
 
     /**
      * Create a new animated sprite from an image file.
-     * 
-     * The image file will be split into regions based on the given height
-     * and width and used to animate the sprite
-     * 
-     * @param filename the image file used as texture
-     * @param x the initial x position
-     * @param y the initial y position
-     * @param width the width of the sprite
-     * @param height the height of the sprite
      */
     public AnimatedSprite(String filename, int x, int y, int width, int height) {
         texture = new Texture(filename);
-        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear); // Set texture filtering
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         position = new Rectangle(x, y, width, height);
-        regions = new TextureRegion[] { new TextureRegion(texture) }; // Use the entire texture as one region
+        regions = new TextureRegion[] { new TextureRegion(texture) }; // Entire texture as one region
         animation = new Animation<>(0.15f, regions);
         bounds = null;
     }
 
-
     /**
      * Create a new animated sprite from a texture.
-     * 
-     * The texture will be split into regions based on the given height
-     * and width and used to animate the sprite
-     * 
-     * @param texture the texture to use
-     * @param x the initial x position
-     * @param y the initial y position
-     * @param width the width of the sprite
-     * @param height the height of the sprite
      */
     public AnimatedSprite(Texture texture, int x, int y, int width, int height) {
         position = new Rectangle(x, y, width, height);
         regions = createRegions(texture, width, height);
-        animation = new Animation<>(0.2f, regions); // Increase frame duration to 0.2 seconds
+        animation = new Animation<>(0.2f, regions); // Adjust frame duration if needed
         bounds = null;
+        this.texture = texture;
     }
 
+    /**
+     * Splits the texture into regions based on width and height.
+     */
     private TextureRegion[] createRegions(Texture texture, int width, int height) {
         TextureRegion[][] regs = TextureRegion.split(texture, width, height);
         List<TextureRegion> res = new ArrayList<>();
@@ -77,13 +53,7 @@ public class AnimatedSprite {
     }
 
     /**
-     * Update the position of the sprite according to the
-     * delta x and delta y.
-     * 
-     * If a bound has been set the sprite is never moved outside
-     * these bounds by this method.
-     * 
-     * @param deltaTime the number of seconds since last update
+     * Update the sprite's position based on its velocity.
      */
     public void update(float deltaTime) {
         position.x += deltaX * deltaTime;
@@ -92,43 +62,34 @@ public class AnimatedSprite {
         if (bounds != null) {
             if (position.x < bounds.x) {
                 position.x = bounds.x;
+            } else if (position.x + position.width > bounds.x + bounds.width) {
+                position.x = bounds.x + bounds.width - position.width;
             }
-            else if (position.x + position.width > bounds.x + bounds.width) {
-                position.x =  bounds.x + bounds.width - position.width;
-            }
-
             if (position.y < bounds.y) {
                 position.y = bounds.y;
-            }
-            else if (position.y + position.height > bounds.y + bounds.height) {
-                position.y =  bounds.y + bounds.height - position.height;
+            } else if (position.y + position.height > bounds.y + bounds.height) {
+                position.y = bounds.y + bounds.height - position.height;
             }
         }
     }
 
+    /**
+     * Draw the sprite using the current frame of the animation.
+     */
     public void draw(SpriteBatch batch, float elapsedTime) {
         TextureRegion region = animation.getKeyFrame(elapsedTime, true);
         batch.draw(region, position.getX(), position.getY(), position.getWidth(), position.getHeight());
     }
 
     /**
-     * Setting a bound make sure that the sprite is never
-     * moved outside that bound.
-     * 
-     * Setting the bounds to null will remove any restrictions on
-     * the sprite's movements.
-     * 
-     * @param bounds rectangle to keep the sprite within
+     * Sets bounds to restrict the sprite's movement.
      */
     public void setBounds(Rectangle bounds) {
         this.bounds = new Rectangle(bounds);
     }
 
     /**
-     * Set the position of the sprite. This method will ignore any bounds.
-     *
-     * @param x the horizontal position
-     * @param y the vertical position
+     * Sets the position of the sprite.
      */
     public void setPosition(int x, int y) {
         position.setPosition(x, y);
@@ -142,20 +103,10 @@ public class AnimatedSprite {
         return position.y;
     }
 
-    /**
-     * Get the width of the sprite.
-     *
-     * @return the width of the sprite
-     */
     public float getWidth() {
         return position.width;
     }
 
-    /**
-     * Get the height of the sprite.
-     *
-     * @return the height of the sprite
-     */
     public float getHeight() {
         return position.height;
     }
@@ -164,11 +115,6 @@ public class AnimatedSprite {
         return deltaX;
     }
 
-    /**
-     * Set the delta x speed for this sprite in pixels per second.
-     * 
-     * @param deltaX horizontal movement in pixels per second
-     */
     public void setDeltaX(float deltaX) {
         this.deltaX = deltaX;
     }
@@ -177,15 +123,13 @@ public class AnimatedSprite {
         return deltaY;
     }
 
-    /**
-     * Set the delta y speed for this sprite in pixels per second.
-     * 
-     * @param deltaY vertical movement in pixels per second
-     */
     public void setDeltaY(float deltaY) {
         this.deltaY = deltaY;
     }
 
+    /**
+     * Dispose of the texture.
+     */
     public void dispose() {
         if (texture != null) {
             texture.dispose();
@@ -193,12 +137,23 @@ public class AnimatedSprite {
     }
 
     /**
-     * Does this sprite overlap the other in any way with the given sprite.
-     * 
-     * @param other sprite to check for collision
-     * @return true if they overlap, false otherwise
+     * Check if this sprite overlaps with another.
      */
     public boolean overlaps(AnimatedSprite other) {
         return position.overlaps(other.position);
+    }
+
+    /**
+     * Update the texture and reset the animation.
+     *
+     * Since the sprite's animation is built from the texture's regions,
+     * we need to update the regions and animation when changing the texture.
+     */
+    public void setTexture(Texture texture) {
+        this.texture = texture;
+        // use the entire new texture as a single region.
+        regions = new TextureRegion[] { new TextureRegion(texture) };
+        // create a new animation with the updated region.
+        animation = new Animation<>(0.15f, regions);
     }
 }
