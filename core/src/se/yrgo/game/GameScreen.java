@@ -15,17 +15,27 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static final int ALIEN_HEIGHT = 100;
 
     // Difficulty-based constants
-    private static final float EASY_SPEED_START = 100f;
-    private static final float MEDIUM_SPEED_START = 130f;
-    private static final float HARD_SPEED_START = 170f;
+//    private static final float EASY_SPEED_START = 100f;
+//    private static final float MEDIUM_SPEED_START = 130f;
+//    private static final float HARD_SPEED_START = 170f;
+//
+//    private static final float EASY_PLANET_SPAWN_INTERVAL = 2.0f;
+//    private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 1.5f;
+//    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
+//
+//    private static final int EASY_MAX_PLANETS = 4;
+//    private static final int MEDIUM_MAX_PLANETS = 5;
+//    private static final int HARD_MAX_PLANETS = 6;
 
-    private static final float EASY_PLANET_SPAWN_INTERVAL = 2.0f;
-    private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 1.5f;
+    // Same speed for all difficulties
+    private static final float PLANET_SPEED = 130f;
+    private static final float EASY_PLANET_SPAWN_INTERVAL = 3.0f;
+    private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 2.0f;
     private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
 
-    private static final int EASY_MAX_PLANETS = 4;
+    private static final int EASY_MAX_PLANETS = 3;
     private static final int MEDIUM_MAX_PLANETS = 5;
-    private static final int HARD_MAX_PLANETS = 6;
+    private static final int HARD_MAX_PLANETS = 8;
 
     private AlienGame alienGame;
     private SpriteBatch batch;
@@ -136,9 +146,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         String planetTexturePath = randomizePlanet();
         Texture planetTexture = new Texture(planetTexturePath);
 
-        AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(),
-                planetTexture.getHeight());
-        planet.setDeltaX(-speed);
+        AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(), planetTexture.getHeight());
+        planet.setDeltaX(-PLANET_SPEED);
         planets.add(planet);
     }
 
@@ -158,17 +167,14 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         // Set difficulty-based parameters
         switch (alienGame.getDifficulty()) {
             case EASY:
-                speed = EASY_SPEED_START;
                 PLANET_SPAWN_INTERVAL = EASY_PLANET_SPAWN_INTERVAL;
                 MAX_PLANETS_ON_SCREEN = EASY_MAX_PLANETS;
                 break;
             case MEDIUM:
-                speed = MEDIUM_SPEED_START;
                 PLANET_SPAWN_INTERVAL = MEDIUM_PLANET_SPAWN_INTERVAL;
                 MAX_PLANETS_ON_SCREEN = MEDIUM_MAX_PLANETS;
                 break;
             case HARD:
-                speed = HARD_SPEED_START;
                 PLANET_SPAWN_INTERVAL = HARD_PLANET_SPAWN_INTERVAL;
                 MAX_PLANETS_ON_SCREEN = HARD_MAX_PLANETS;
                 break;
@@ -209,12 +215,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         checkForGameOver();
     }
 
+
+    // speed
     private void updateState(float deltaTime) {
         if (!isFirstInput) {
             alien.setDeltaY(alien.getDeltaY() + GRAVITY * deltaTime);
         }
-
-        speed += 20 * deltaTime;
 
         // When falling, revert to the normal texture.
         if (alien.getDeltaY() <= 0) {
