@@ -4,6 +4,7 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Texture.*;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
 
 /**
@@ -18,6 +19,9 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
     private BitmapFont bigFont;
     private BitmapFont smallFont;
     private float elapsedTime = 0;
+    private Rectangle easyBounds;
+    private Rectangle mediumBounds;
+    private Rectangle hardBounds;
     private Difficulty difficulty;
 
     public GameOverScreen(AlienGame alienGame) {
@@ -88,6 +92,27 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         alienHead.draw(batch, elapsedTime);
 
         batch.end();
+
+        // Define clickable areas for difficulty options
+        this.easyBounds = new Rectangle(screenWidth / 2f - 200, optionY - 20, 100, 40);
+        this.mediumBounds = new Rectangle(screenWidth / 2f - 50, optionY - 20, 100, 40);
+        this.hardBounds = new Rectangle(screenWidth / 2f + 100, optionY - 20, 100, 40);
+
+        if (Gdx.input.justTouched()) {
+            int x = Gdx.input.getX();
+            int y = Gdx.graphics.getHeight() - Gdx.input.getY(); // Convert to game coordinates
+
+            if (easyBounds.contains(x, y)) {
+                alienGame.setDifficulty(Difficulty.EASY);
+                alienGame.newGame();
+            } else if (mediumBounds.contains(x, y)) {
+                alienGame.setDifficulty(Difficulty.MEDIUM);
+                alienGame.newGame();
+            } else if (hardBounds.contains(x, y)) {
+                alienGame.setDifficulty(Difficulty.HARD);
+                alienGame.newGame();
+            }
+        }
     }
 
     @Override
