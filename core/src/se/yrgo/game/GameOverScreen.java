@@ -18,6 +18,7 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
     private BitmapFont bigFont;
     private BitmapFont smallFont;
     private float elapsedTime = 0;
+    private Difficulty difficulty;
 
     public GameOverScreen(AlienGame alienGame) {
         int width = Gdx.graphics.getWidth();
@@ -57,18 +58,35 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
 
     @Override
     public void render(float delta) {
-        // we need elapsed time for our animations
         elapsedTime += delta;
 
         ScreenUtils.clear(0.75f, 0.75f, 0.75f, 1);
 
-        batch.begin();
-        bigFont.draw(batch, "Game Over!", 100, 100, 600, Align.center, false);
+        int screenWidth = Gdx.graphics.getWidth();
+        int screenHeight = Gdx.graphics.getHeight();
 
+        batch.begin();
+
+        // Game Over text
+        float gameOverY = screenHeight / 2f - 50;
+        bigFont.draw(batch, "Game Over!", 0, gameOverY, screenWidth, Align.center, false);
+
+        // Points text
         String points = String.format("You scored: %d", alienGame.getPoints());
-        smallFont.draw(batch, points, 100, 50, 600, Align.center, false);
+        smallFont.draw(batch, points, 0, gameOverY - 50, screenWidth, Align.center, false);
+
+        // Difficulty prompt
+        float difficultyY = gameOverY + 190;
+        smallFont.draw(batch, "Change difficulty?", 0, difficultyY, screenWidth, Align.center, false);
+
+        // Difficulty options
+        float optionY = difficultyY - 40;
+        smallFont.draw(batch, "Easy", screenWidth / 2f - 200, optionY, 100, Align.center, false);
+        smallFont.draw(batch, "Medium", screenWidth / 2f - 50, optionY, 100, Align.center, false);
+        smallFont.draw(batch, "Hard", screenWidth / 2f + 100, optionY, 100, Align.center, false);
 
         alienHead.draw(batch, elapsedTime);
+
         batch.end();
     }
 

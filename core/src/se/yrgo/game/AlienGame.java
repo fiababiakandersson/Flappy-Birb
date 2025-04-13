@@ -9,9 +9,6 @@ import com.badlogic.gdx.*;
  * menus, different game modes, end screens etc.
  */
 public class AlienGame extends Game {
-	public enum Difficulty {
-		EASY, MEDIUM, HARD
-	}
 	private GameScreen gameScreen;
 	private GameOverScreen gameOverScreen;
 	private MenuScreen menuScreen;
@@ -20,7 +17,6 @@ public class AlienGame extends Game {
 	private int highScore;
 	private Preferences prefs;
 	private Difficulty difficulty = Difficulty.MEDIUM;
-
 
 	@Override
 	public void create() {
@@ -33,7 +29,7 @@ public class AlienGame extends Game {
 		menuScreen = new MenuScreen(this);
 
 		setScreen(menuScreen);
-//		newGame();
+		// newGame();
 	}
 
 	@Override
@@ -68,7 +64,7 @@ public class AlienGame extends Game {
 	}
 
 	public void gameOver() {
-	 setScreen(gameOverScreen);
+		setScreen(gameOverScreen);
 	}
 
 	public void setDifficulty(Difficulty difficulty) {
