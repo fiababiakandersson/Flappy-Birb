@@ -20,7 +20,7 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
     private Rectangle mediumBounds;
     private Rectangle hardBounds;
 
-    // New fields for star decoration
+    // star decoration
     private Texture starTexture;
     private List<AnimatedSprite> edgeStars;
     private static final int STAR_COUNT = 40;
@@ -32,7 +32,7 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         this.alienGame = alienGame;
         this.batch = new SpriteBatch();
 
-        // Initialize fonts and set them to white
+        // initialize fonts and set them to white
         this.bigFont = new BitmapFont();
         this.smallFont = new BitmapFont();
         this.bigFont.setColor(Color.WHITE);
@@ -42,18 +42,18 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         this.smallFont.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
         this.smallFont.getData().setScale(1.5f);
 
-        // Center the alien head image near the bottom
+        // center the alien head image near the bottom
         this.alienHead = new AnimatedSprite("alien.png", (width / 2) - (106 / 2), 250, 106, 80);
 
-        // Load the star texture and initialize the edge stars
+        // load the star texture and initialize the edge stars
         this.starTexture = new Texture(Gdx.files.internal("extrasmallstars.png"));
         edgeStars = new ArrayList<>();
         initializeEdgeStars();
     }
 
     /**
-     * Create stars at random positions along the screen edges.
-     * For each star, we randomly choose one edge (top, bottom, left, or right)
+     * create stars at random positions along the screen edges.
+     * for each star, we randomly choose one edge (top, bottom, left, or right)
      * and then pick a coordinate along that edge.
      */
     private void initializeEdgeStars() {
@@ -63,7 +63,6 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
 
         for (int i = 0; i < STAR_COUNT; i++) {
             int x = 0, y = 0;
-            // Randomly choose an edge: 0 = top, 1 = bottom, 2 = left, 3 = right.
             int edge = random.nextInt(4);
             switch (edge) {
                 case 0: // top edge
@@ -114,20 +113,20 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
 
         batch.begin();
 
-        // Render the decorative edge stars
+        // render the decorative stars
         for (AnimatedSprite star : edgeStars) {
             star.draw(batch, elapsedTime);
         }
 
-        // Draw "Game Over!" text centered in the middle of the screen
+        // draw "Game Over!" text
         float gameOverY = screenHeight / 2f - 50;
         bigFont.draw(batch, "Game Over!", 0, gameOverY, screenWidth, Align.center, false);
 
-        // Draw the score below the Game Over text
+        // draw the score below the Game Over text
         String points = String.format("You scored: %d", alienGame.getPoints());
         smallFont.draw(batch, points, 0, gameOverY - 50, screenWidth, Align.center, false);
 
-        // Draw difficulty prompt further above the Game Over text
+        // draw difficulty prompt
         float difficultyY = gameOverY + 160;
         smallFont.draw(batch, "Change difficulty?", 0, difficultyY, screenWidth, Align.center, false);
 
@@ -137,19 +136,18 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         smallFont.draw(batch, "Medium", screenWidth / 2f - 50, optionY, 100, Align.center, false);
         smallFont.draw(batch, "Hard", screenWidth / 2f + 100, optionY, 100, Align.center, false);
 
-        // Draw the alien (your animated sprite)
         alienHead.draw(batch, elapsedTime);
 
         batch.end();
 
-        // Define clickable areas for difficulty options
+        // define clickable areas for difficulty options
         this.easyBounds = new Rectangle(screenWidth / 2f - 200, optionY - 20, 100, 40);
         this.mediumBounds = new Rectangle(screenWidth / 2f - 50, optionY - 20, 100, 40);
         this.hardBounds = new Rectangle(screenWidth / 2f + 100, optionY - 20, 100, 40);
 
         if (Gdx.input.justTouched()) {
             int x = Gdx.input.getX();
-            int y = Gdx.graphics.getHeight() - Gdx.input.getY(); // Convert to game coordinates
+            int y = Gdx.graphics.getHeight() - Gdx.input.getY();
 
             if (easyBounds.contains(x, y)) {
                 alienGame.setDifficulty(Difficulty.EASY);
@@ -179,7 +177,6 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         return true;
     }
 
-    // The rest of the InputProcessor methods (keyDown, keyUp, touchDown, etc.)
     @Override
     public boolean keyDown(int keycode) {
         return false;
