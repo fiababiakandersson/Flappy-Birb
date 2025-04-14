@@ -5,7 +5,7 @@ import java.util.concurrent.*;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input.*;
-import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
@@ -15,16 +15,16 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static final int ALIEN_HEIGHT = 100;
 
     // Difficulty-based constants
-//    private static final float MEDIUM_SPEED_START = 130f;
-//    private static final float HARD_SPEED_START = 170f;
-//
-//    private static final float EASY_PLANET_SPAWN_INTERVAL = 2.0f;
-//    private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 1.5f;
-//    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
-//
-//    private static final int EASY_MAX_PLANETS = 4;
-//    private static final int MEDIUM_MAX_PLANETS = 5;
-//    private static final int HARD_MAX_PLANETS = 6;
+    // private static final float MEDIUM_SPEED_START = 130f;
+    // private static final float HARD_SPEED_START = 170f;
+    //
+    // private static final float EASY_PLANET_SPAWN_INTERVAL = 2.0f;
+    // private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 1.5f;
+    // private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
+    //
+    // private static final int EASY_MAX_PLANETS = 4;
+    // private static final int MEDIUM_MAX_PLANETS = 5;
+    // private static final int HARD_MAX_PLANETS = 6;
 
     // Same speed for all difficulties
     private static final float PLANET_SPEED = 130f;
@@ -59,7 +59,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static int MAX_PLANETS_ON_SCREEN;
     private Music gamePlayMusic = Gdx.audio.newMusic(Gdx.files.internal("music/1.MainTheme-320bit(chosic.com).mp3"));
     private Music jumpingMusic = Gdx.audio.newMusic(Gdx.files.internal("music/retro-jump.mp3"));
-    private Texture stars =  new Texture(Gdx.files.internal("extrasmallstars.png"));
+    private Texture stars = new Texture(Gdx.files.internal("extrasmallstars.png"));
 
     // New textures for normal and jump state
     private Texture alienNormalTexture;
@@ -69,8 +69,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         this.alienGame = alienGame;
         this.batch = new SpriteBatch();
         // Load both textures
-        alienNormalTexture = new Texture("alien.png");
-        alienJumpTexture = new Texture("alienJumping.png"); // Make sure this image is in your assets folder
+        alienNormalTexture = new Texture("alienJumping.png");
+        alienJumpTexture = new Texture("alien.png"); // Make sure this image is in your assets folder
 
         // Initialize alien with the normal texture
         this.alien = new AnimatedSprite(alienNormalTexture, 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
@@ -94,7 +94,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             int size = random.nextInt(10) + 2; // Random size between 2 and 11 pixels
 
             // Create star (using stars.png texture)
-            AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42, 64
+            AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42,
+                                                                           // 64
             star.setDeltaX(STAR_SPEED); // Stars move slowly to the left
             backgroundStars.add(star);
         }
@@ -199,7 +200,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             return;
         }
 
-        if(!gamePlayMusic.isPlaying() && !gameOver){
+        if (!gamePlayMusic.isPlaying() && !gameOver) {
             gamePlayMusic.play();
         }
 
@@ -322,9 +323,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
                 isFirstInput = false;
             }
 
-          
             jumpingMusic.play();
-            
+
             alien.setDeltaY(BOUNCE_VELOCITY);
             // Switch to the jump texture when the alien jumps
             alien.setTexture(alienJumpTexture);
@@ -338,13 +338,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             isFirstInput = false;
         }
 
-        if(!jumpingMusic.isPlaying()){
+        if (!jumpingMusic.isPlaying()) {
+            jumpingMusic.play();
+        } else {
             jumpingMusic.play();
         }
-        else{
-            jumpingMusic.play();
-        }
-        
+
         alien.setDeltaY(BOUNCE_VELOCITY);
         // Switch to the jump texture when the alien jumps
         alien.setTexture(alienJumpTexture);
