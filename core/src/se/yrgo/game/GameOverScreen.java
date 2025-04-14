@@ -1,16 +1,14 @@
 package se.yrgo.game;
 
+import java.util.*;
+
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Texture.*;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
 
-/**
- * Screen for game over. Shows the points for the last game
- * and will start a new game for any keypress.
- * 
- */
 public class GameOverScreen extends ScreenAdapter implements InputProcessor {
     private AlienGame alienGame;
     private SpriteBatch batch;
@@ -18,28 +16,75 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
     private BitmapFont bigFont;
     private BitmapFont smallFont;
     private float elapsedTime = 0;
+    private Rectangle easyBounds;
+    private Rectangle mediumBounds;
+    private Rectangle hardBounds;
+
+    // star decoration
+    private Texture starTexture;
+    private List<AnimatedSprite> edgeStars;
+    private static final int STAR_COUNT = 40;
+    private static final int STAR_WIDTH = 21;
+    private static final int STAR_HEIGHT = 32;
 
     public GameOverScreen(AlienGame alienGame) {
         int width = Gdx.graphics.getWidth();
-
         this.alienGame = alienGame;
         this.batch = new SpriteBatch();
+
+        // initialize fonts and set them to white
         this.bigFont = new BitmapFont();
-
-        this.alienHead = new AnimatedSprite("alien.png", (width / 2) - (106 / 2), 130, 106, 80);
-        // should maybe use Label instead of drawing with fonts directly
-        // also, scaling bitmap fonts are really ugly
-
-        final Color fontColor = Color.FIREBRICK;
-
-        this.bigFont.setColor(fontColor);
+        this.smallFont = new BitmapFont();
+        this.bigFont.setColor(Color.WHITE);
+        this.smallFont.setColor(Color.WHITE);
         this.bigFont.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
         this.bigFont.getData().setScale(2.5f);
-
-        this.smallFont = new BitmapFont();
-        this.smallFont.setColor(fontColor);
         this.smallFont.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
         this.smallFont.getData().setScale(1.5f);
+
+        // center the alien head image near the bottom
+        this.alienHead = new AnimatedSprite("alien.png", (width / 2) - (106 / 2), 250, 106, 80);
+
+        // load the star texture and initialize the edge stars
+        this.starTexture = new Texture(Gdx.files.internal("extrasmallstars.png"));
+        edgeStars = new ArrayList<>();
+        initializeEdgeStars();
+    }
+
+    /**
+     * create stars at random positions along the screen edges.
+     * for each star, we randomly choose one edge (top, bottom, left, or right)
+     * and then pick a coordinate along that edge.
+     */
+    private void initializeEdgeStars() {
+        Random random = new Random();
+        int screenWidth = Gdx.graphics.getWidth();
+        int screenHeight = Gdx.graphics.getHeight();
+
+        for (int i = 0; i < STAR_COUNT; i++) {
+            int x = 0, y = 0;
+            int edge = random.nextInt(4);
+            switch (edge) {
+                case 0: // top edge
+                    x = random.nextInt(screenWidth);
+                    y = screenHeight - random.nextInt(400);
+                    break;
+                case 1: // bottom edge
+                    x = random.nextInt(screenWidth);
+                    y = random.nextInt(40);
+                    break;
+                case 2: // left edge
+                    x = random.nextInt(60);
+                    y = random.nextInt(screenHeight);
+                    break;
+                case 3: // right edge
+                    x = screenWidth - random.nextInt(60);
+                    y = random.nextInt(screenHeight);
+                    break;
+            }
+            AnimatedSprite star = new AnimatedSprite(starTexture, x, y, STAR_WIDTH, STAR_HEIGHT);
+            edgeStars.add(star);
+        }
     }
 
     @Override
@@ -47,6 +92,7 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         bigFont.dispose();
         smallFont.dispose();
         alienHead.dispose();
+        starTexture.dispose();
         batch.dispose();
     }
 
@@ -57,19 +103,64 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
 
     @Override
     public void render(float delta) {
-        // we need elapsed time for our animations
+
         elapsedTime += delta;
 
-        ScreenUtils.clear(0.75f, 0.75f, 0.75f, 1);
+        ScreenUtils.clear(0.043f, 0.078f, 0.22f, 1.0f);
+
+        int screenWidth = Gdx.graphics.getWidth();
+        int screenHeight = Gdx.graphics.getHeight();
 
         batch.begin();
-        bigFont.draw(batch, "Game Over!", 100, 100, 600, Align.center, false);
 
+        // render the decorative stars
+        for (AnimatedSprite star : edgeStars) {
+            star.draw(batch, elapsedTime);
+        }
+
+        // draw "Game Over!" text
+        float gameOverY = screenHeight / 2f - 50;
+        bigFont.draw(batch, "Game Over!", 0, gameOverY, screenWidth, Align.center, false);
+
+        // draw the score below the Game Over text
         String points = String.format("You scored: %d", alienGame.getPoints());
-        smallFont.draw(batch, points, 100, 50, 600, Align.center, false);
+        smallFont.draw(batch, points, 0, gameOverY - 50, screenWidth, Align.center, false);
+
+        // draw difficulty prompt
+        float difficultyY = gameOverY + 160;
+        smallFont.draw(batch, "Change difficulty?", 0, difficultyY, screenWidth, Align.center, false);
+
+        // Draw difficulty option labels centered below the prompt
+        float optionY = difficultyY - 40;
+        smallFont.draw(batch, "Easy", screenWidth / 2f - 200, optionY, 100, Align.center, false);
+        smallFont.draw(batch, "Medium", screenWidth / 2f - 50, optionY, 100, Align.center, false);
+        smallFont.draw(batch, "Hard", screenWidth / 2f + 100, optionY, 100, Align.center, false);
 
         alienHead.draw(batch, elapsedTime);
+
         batch.end();
+
+        // define clickable areas for difficulty options
+        this.easyBounds = new Rectangle(screenWidth / 2f - 200, optionY - 20, 100, 40);
+        this.mediumBounds = new Rectangle(screenWidth / 2f - 50, optionY - 20, 100, 40);
+        this.hardBounds = new Rectangle(screenWidth / 2f + 100, optionY - 20, 100, 40);
+
+        if (Gdx.input.justTouched()) {
+            int x = Gdx.input.getX();
+            int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+
+            if (easyBounds.contains(x, y)) {
+                alienGame.setDifficulty(Difficulty.EASY);
+                alienGame.newGame();
+            } else if (mediumBounds.contains(x, y)) {
+                alienGame.setDifficulty(Difficulty.MEDIUM);
+                alienGame.newGame();
+            } else if (hardBounds.contains(x, y)) {
+                alienGame.setDifficulty(Difficulty.HARD);
+                alienGame.newGame();
+            }
+        }
+
     }
 
     @Override
@@ -80,12 +171,9 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
 
     @Override
     public boolean keyTyped(char character) {
-        // wait a second before accepting key strokes
-        // since the player may hammer the keyboard as part of playing
         if (elapsedTime > 1) {
             alienGame.newGame();
         }
-
         return true;
     }
 
@@ -96,11 +184,6 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
         return false;
     }
 
@@ -126,6 +209,11 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
+        return false;
+    }
+
+    @Override
+    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
         return false;
     }
 }
