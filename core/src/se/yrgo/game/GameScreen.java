@@ -45,8 +45,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private BitmapFont font;
     private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
 
-    private static final float GRAVITY = -2700f;
-    private static final float BOUNCE_VELOCITY = 650f;
+    private static final float GRAVITY = -1800f;
+    private static final float BOUNCE_VELOCITY = 680f;
     private static final int STAR_COUNT = 50; // Number of background stars
 
     private boolean gameOver = false;
