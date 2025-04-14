@@ -45,10 +45,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private BitmapFont font;
     private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
 
-    private static final float GRAVITY = -2700f;
-    private static final float BOUNCE_VELOCITY = 650f;
-    private static final int STAR_COUNT = 100; // Number of background stars
-    private static final float STAR_SPEED = -90f; // Background stars move slower than planets
+    private static final float GRAVITY = -1800f;
+    private static final float BOUNCE_VELOCITY = 680f;
+    private static final int STAR_COUNT = 50; // Number of background stars
 
     private boolean gameOver = false;
     private float elapsedTime;
@@ -91,12 +90,16 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         for (int i = 0; i < STAR_COUNT; i++) {
             int x = random.nextInt(screenWidth);
             int y = random.nextInt(screenHeight);
-            int size = random.nextInt(10) + 2; // Random size between 2 and 11 pixels
 
             // Create star (using stars.png texture)
             AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42,
                                                                            // 64
-            star.setDeltaX(STAR_SPEED); // Stars move slowly to the left
+
+            List<Float> STAR_SPEED_LIST = new ArrayList<>(Arrays.asList(-90f, -70f, -100f));
+
+            int randomSpeed = random.nextInt(STAR_SPEED_LIST.size());
+
+            star.setDeltaX(STAR_SPEED_LIST.get(randomSpeed)); // Stars move slowly to the left
             backgroundStars.add(star);
         }
     }
