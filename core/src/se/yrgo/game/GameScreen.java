@@ -48,7 +48,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static final float GRAVITY = -2700f;
     private static final float BOUNCE_VELOCITY = 650f;
     private static final int STAR_COUNT = 50; // Number of background stars
-    private static final float STAR_SPEED = -90f; // Background stars move slower than planets
 
     private boolean gameOver = false;
     private float elapsedTime;
@@ -95,7 +94,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             // Create star (using stars.png texture)
             AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42,
                                                                            // 64
-            star.setDeltaX(STAR_SPEED); // Stars move slowly to the left
+
+            List<Float> STAR_SPEED_LIST = new ArrayList<>(Arrays.asList(-90f, -70f, -100f));
+
+            int randomSpeed = random.nextInt(STAR_SPEED_LIST.size());
+
+            star.setDeltaX(STAR_SPEED_LIST.get(randomSpeed)); // Stars move slowly to the left
             backgroundStars.add(star);
         }
     }
