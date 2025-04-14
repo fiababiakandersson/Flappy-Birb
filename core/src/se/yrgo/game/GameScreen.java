@@ -47,7 +47,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
     private static final float GRAVITY = -2700f;
     private static final float BOUNCE_VELOCITY = 650f;
-    private static final int STAR_COUNT = 100; // Number of background stars
+    private static final int STAR_COUNT = 50; // Number of background stars
     private static final float STAR_SPEED = -90f; // Background stars move slower than planets
 
     private boolean gameOver = false;
@@ -91,7 +91,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         for (int i = 0; i < STAR_COUNT; i++) {
             int x = random.nextInt(screenWidth);
             int y = random.nextInt(screenHeight);
-            int size = random.nextInt(10) + 2; // Random size between 2 and 11 pixels
 
             // Create star (using stars.png texture)
             AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42,

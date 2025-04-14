@@ -43,13 +43,31 @@ public class AnimatedSprite {
      */
     private TextureRegion[] createRegions(Texture texture, int width, int height) {
         TextureRegion[][] regs = TextureRegion.split(texture, width, height);
-        List<TextureRegion> res = new ArrayList<>();
+        List<TextureRegion> flatList = new ArrayList<>();
+
+        // Lägg in alla regioner i en platt lista
         for (int i = 0; i < regs.length; i++) {
             for (int j = 0; j < regs[i].length; j++) {
-                res.add(regs[i][j]);
+                flatList.add(regs[i][j]);
             }
         }
-        return res.toArray(new TextureRegion[res.size()]);
+
+        int totalRegions = flatList.size();
+        Random random = new Random();
+        int startIndex = random.nextInt(totalRegions); // Slumpmässigt startindex
+
+        List<TextureRegion> result = new ArrayList<>();
+
+        // Lägg till från startIndex till slutet
+        for (int i = startIndex; i < totalRegions; i++) {
+            result.add(flatList.get(i));
+        }
+        // Fortsätt från början upp till startIndex
+        for (int i = 0; i < startIndex; i++) {
+            result.add(flatList.get(i));
+        }
+
+        return result.toArray(new TextureRegion[0]);
     }
 
     /**
