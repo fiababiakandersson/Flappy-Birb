@@ -27,15 +27,15 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     // private static final int HARD_MAX_PLANETS = 6;
 
     // Same speed for all difficulties
-    private static final float PLANET_SPEED = 130f;
+    private static float PLANET_SPEED = 130f;
     private static final float EASY_PLANET_SPAWN_INTERVAL = 3.0f;
     private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 2.0f;
-    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
+    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.2f;
 
     // Max planets allowed on screen per difficulty
     private static final int EASY_MAX_PLANETS = 3;
     private static final int MEDIUM_MAX_PLANETS = 5;
-    private static final int HARD_MAX_PLANETS = 7;
+    private static final int HARD_MAX_PLANETS = 6;
 
     private AlienGame alienGame;
     private SpriteBatch batch;
@@ -51,7 +51,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
     private boolean gameOver = false;
     private float elapsedTime;
-    private float speed;
     private boolean isFirstInput = true;
     private float planetSpawnTimer = 0;
     private static float PLANET_SPAWN_INTERVAL;
@@ -95,11 +94,15 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42,
                                                                            // 64
 
-            List<Float> STAR_SPEED_LIST = new ArrayList<>(Arrays.asList(-90f, -70f, -100f));
+            // make planets move faster depending on difficulty
+            float minSpeedFactor = 0.4f; // 40% of PLANET_SPEED
+            float maxSpeedFactor = 0.8f; // 70% of PLANET_SPEED
 
-            int randomSpeed = random.nextInt(STAR_SPEED_LIST.size());
+            float speedFactor = minSpeedFactor + random.nextFloat() * (maxSpeedFactor - minSpeedFactor);
+            float starSpeed = -PLANET_SPEED * speedFactor;
 
-            star.setDeltaX(STAR_SPEED_LIST.get(randomSpeed)); // Stars move slowly to the left
+            star.setDeltaX(starSpeed);
+
             backgroundStars.add(star);
         }
     }
@@ -176,10 +179,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
                 MAX_PLANETS_ON_SCREEN = EASY_MAX_PLANETS;
                 break;
             case MEDIUM:
+                PLANET_SPEED = 180f;
                 PLANET_SPAWN_INTERVAL = MEDIUM_PLANET_SPAWN_INTERVAL;
                 MAX_PLANETS_ON_SCREEN = MEDIUM_MAX_PLANETS;
                 break;
             case HARD:
+                PLANET_SPEED = 200f;
                 PLANET_SPAWN_INTERVAL = HARD_PLANET_SPAWN_INTERVAL;
                 MAX_PLANETS_ON_SCREEN = HARD_MAX_PLANETS;
                 break;
