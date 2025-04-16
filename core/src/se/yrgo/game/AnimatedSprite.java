@@ -14,6 +14,8 @@ public class AnimatedSprite {
     private Rectangle bounds;
     private float deltaX;
     private float deltaY;
+    private float width, height;
+    private float x, y;
 
     /**
      * Create a new animated sprite from an image file.
@@ -25,6 +27,13 @@ public class AnimatedSprite {
         regions = new TextureRegion[] { new TextureRegion(texture) }; // Entire texture as one region
         animation = new Animation<>(0.15f, regions);
         bounds = null;
+
+        this.width = position.width;
+        this.height = position.height;
+
+        this.x = position.x;
+        this.y = position.y;
+
     }
 
     /**
@@ -36,6 +45,12 @@ public class AnimatedSprite {
         animation = new Animation<>(0.2f, regions); // Adjust frame duration if needed
         bounds = null;
         this.texture = texture;
+
+        this.width = position.width;
+        this.height = position.height;
+
+        this.x = position.x;
+        this.y = position.y;
     }
 
     /**
@@ -97,6 +112,8 @@ public class AnimatedSprite {
     public void draw(SpriteBatch batch, float elapsedTime) {
         TextureRegion region = animation.getKeyFrame(elapsedTime, true);
         batch.draw(region, position.getX(), position.getY(), position.getWidth(), position.getHeight());
+
+        System.out.println(width + " " + height + " " + x + " " + y);
     }
 
     /**
@@ -158,7 +175,21 @@ public class AnimatedSprite {
      * Check if this sprite overlaps with another.
      */
     public boolean overlaps(AnimatedSprite other) {
-        return position.overlaps(other.position);
+        float margin = 5f; // shrink hitbox by 5 pixels on all sides
+
+        float ax = position.x + margin;
+        float ay = position.y + margin;
+        float aw = position.width - 2 * margin;
+        float ah = position.height - 2 * margin;
+
+        float bx = other.position.x + margin;
+        float by = other.position.y + margin;
+        float bw = other.position.width - 2 * margin;
+        float bh = other.position.height - 2 * margin;
+
+        boolean overlap = ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+
+        return overlap;
     }
 
     /**
