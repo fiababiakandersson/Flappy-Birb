@@ -30,12 +30,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static float PLANET_SPEED = 130f;
     private static final float EASY_PLANET_SPAWN_INTERVAL = 3.0f;
     private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 2.0f;
-    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
+    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.2f;
 
     // Max planets allowed on screen per difficulty
     private static final int EASY_MAX_PLANETS = 3;
     private static final int MEDIUM_MAX_PLANETS = 5;
-    private static final int HARD_MAX_PLANETS = 7;
+    private static final int HARD_MAX_PLANETS = 6;
 
     private AlienGame alienGame;
     private SpriteBatch batch;
@@ -51,7 +51,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
     private boolean gameOver = false;
     private float elapsedTime;
-    private float speed;
     private boolean isFirstInput = true;
     private float planetSpawnTimer = 0;
     private static float PLANET_SPAWN_INTERVAL;
@@ -181,7 +180,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
                 MAX_PLANETS_ON_SCREEN = MEDIUM_MAX_PLANETS;
                 break;
             case HARD:
-                PLANET_SPEED = 190f;
+                PLANET_SPEED = 200f;
                 PLANET_SPAWN_INTERVAL = HARD_PLANET_SPAWN_INTERVAL;
                 MAX_PLANETS_ON_SCREEN = HARD_MAX_PLANETS;
                 break;
