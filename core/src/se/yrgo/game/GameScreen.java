@@ -103,13 +103,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
             star.setDeltaX(starSpeed);
 
-            // List<Float> STAR_SPEED_LIST = new ArrayList<>(Arrays.asList(-90f, -70f,
-            // -100f));
-
-            // int randomSpeed = random.nextInt(STAR_SPEED_LIST.size());
-
-            // star.setDeltaX(STAR_SPEED_LIST.get(randomSpeed)); // Stars move slowly to the
-            // left
             backgroundStars.add(star);
         }
     }
