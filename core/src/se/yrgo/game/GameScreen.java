@@ -27,7 +27,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     // private static final int HARD_MAX_PLANETS = 6;
 
     // Same speed for all difficulties
-    private static final float PLANET_SPEED = 130f;
+    private static float PLANET_SPEED = 130f;
     private static final float EASY_PLANET_SPAWN_INTERVAL = 3.0f;
     private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 2.0f;
     private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
@@ -176,10 +176,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
                 MAX_PLANETS_ON_SCREEN = EASY_MAX_PLANETS;
                 break;
             case MEDIUM:
+                PLANET_SPEED = 180f;
                 PLANET_SPAWN_INTERVAL = MEDIUM_PLANET_SPAWN_INTERVAL;
                 MAX_PLANETS_ON_SCREEN = MEDIUM_MAX_PLANETS;
                 break;
             case HARD:
+                PLANET_SPEED = 190f;
                 PLANET_SPAWN_INTERVAL = HARD_PLANET_SPAWN_INTERVAL;
                 MAX_PLANETS_ON_SCREEN = HARD_MAX_PLANETS;
                 break;
