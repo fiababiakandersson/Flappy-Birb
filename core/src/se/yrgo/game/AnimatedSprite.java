@@ -112,8 +112,6 @@ public class AnimatedSprite {
     public void draw(SpriteBatch batch, float elapsedTime) {
         TextureRegion region = animation.getKeyFrame(elapsedTime, true);
         batch.draw(region, position.getX(), position.getY(), position.getWidth(), position.getHeight());
-
-        System.out.println(width + " " + height + " " + x + " " + y);
     }
 
     /**
