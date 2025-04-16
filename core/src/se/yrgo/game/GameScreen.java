@@ -94,11 +94,22 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42,
                                                                            // 64
 
-            List<Float> STAR_SPEED_LIST = new ArrayList<>(Arrays.asList(-90f, -70f, -100f));
+            // make planets move faster depending on difficulty
+            float minSpeedFactor = 0.4f; // 40% of PLANET_SPEED
+            float maxSpeedFactor = 0.8f; // 70% of PLANET_SPEED
 
-            int randomSpeed = random.nextInt(STAR_SPEED_LIST.size());
+            float speedFactor = minSpeedFactor + random.nextFloat() * (maxSpeedFactor - minSpeedFactor);
+            float starSpeed = -PLANET_SPEED * speedFactor;
 
-            star.setDeltaX(STAR_SPEED_LIST.get(randomSpeed)); // Stars move slowly to the left
+            star.setDeltaX(starSpeed);
+
+            // List<Float> STAR_SPEED_LIST = new ArrayList<>(Arrays.asList(-90f, -70f,
+            // -100f));
+
+            // int randomSpeed = random.nextInt(STAR_SPEED_LIST.size());
+
+            // star.setDeltaX(STAR_SPEED_LIST.get(randomSpeed)); // Stars move slowly to the
+            // left
             backgroundStars.add(star);
         }
     }
