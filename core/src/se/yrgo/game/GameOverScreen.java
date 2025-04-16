@@ -43,7 +43,7 @@ public class GameOverScreen extends ScreenAdapter implements InputProcessor {
         this.smallFont.getData().setScale(1.5f);
 
         // center the alien head image near the bottom
-        this.alienHead = new AnimatedSprite("alien.png", (width / 2) - (106 / 2), 250, 106, 80);
+        this.alienHead = new AnimatedSprite("alienJumping.png", (width / 2) - (106 / 2), 250, 106, 80);
 
         // load the star texture and initialize the edge stars
         this.starTexture = new Texture(Gdx.files.internal("extrasmallstars.png"));
