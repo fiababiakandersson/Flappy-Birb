@@ -14,22 +14,20 @@ public class AlienGame extends Game {
 	private MenuScreen menuScreen;
 
 	private int points;
-	private int highScore;
 	private Preferences prefs;
-	private Difficulty difficulty = Difficulty.MEDIUM;
+	private Difficulty currentDifficulty = Difficulty.EASY;
 
 	@Override
 	public void create() {
 		// added
 		prefs = Gdx.app.getPreferences("AlienGamePrefs");
-		highScore = prefs.getInteger("highScore", 0);
 
 		gameScreen = new GameScreen(this);
 		gameOverScreen = new GameOverScreen(this);
 		menuScreen = new MenuScreen(this);
 
 		setScreen(menuScreen);
-		// newGame();
+
 	}
 
 	@Override
@@ -41,10 +39,10 @@ public class AlienGame extends Game {
 
 	public void addPoints(int points) {
 		this.points += points;
-		// added
+
+		int highScore = prefs.getInteger(currentDifficulty.name(), 0);
 		if (this.points > highScore) {
-			highScore = this.points;
-			prefs.putInteger("highScore", highScore);
+			prefs.putInteger(currentDifficulty.name(), this.points);
 			prefs.flush(); // Save to disk
 		}
 	}
@@ -60,7 +58,7 @@ public class AlienGame extends Game {
 
 	// added
 	public int getHighScore() {
-		return highScore;
+		return prefs.getInteger(currentDifficulty.name(), 0);
 	}
 
 	public void gameOver() {
@@ -68,10 +66,10 @@ public class AlienGame extends Game {
 	}
 
 	public void setDifficulty(Difficulty difficulty) {
-		this.difficulty = difficulty;
+		this.currentDifficulty = difficulty;
 	}
 
 	public Difficulty getDifficulty() {
-		return difficulty;
+		return currentDifficulty;
 	}
 }
