@@ -56,22 +56,24 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static float PLANET_SPAWN_INTERVAL;
     private static int MAX_PLANETS_ON_SCREEN;
     private Music gamePlayMusic = Gdx.audio.newMusic(Gdx.files.internal("music/1.MainTheme-320bit(chosic.com).mp3"));
-    private Music jumpingMusic = Gdx.audio.newMusic(Gdx.files.internal("music/retro-jump.mp3"));
+    private Sound jumpingMusic = Gdx.audio.newSound(Gdx.files.internal("music/retro-jump.mp3"));
     private Texture stars = new Texture(Gdx.files.internal("extrasmallstars.png"));
 
     // New textures for normal and jump state
-    private Texture alienNormalTexture;
+    private Texture alienFallingTexture;
     private Texture alienJumpTexture;
+    private Texture alienNeutralTexture;
 
     public GameScreen(AlienGame alienGame) {
         this.alienGame = alienGame;
         this.batch = new SpriteBatch();
         // Load both textures
-        alienNormalTexture = new Texture("alienJumping.png");
-        alienJumpTexture = new Texture("alien.png"); // Make sure this image is in your assets folder
+        alienFallingTexture = new Texture("alienFalling.png");
+        alienJumpTexture = new Texture("alienJumping.png"); 
+        alienNeutralTexture = new Texture("alienNeutral.png"); 
 
         // Initialize alien with the normal texture
-        this.alien = new AnimatedSprite(alienNormalTexture, 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
+        this.alien = new AnimatedSprite(alienFallingTexture, 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
         this.planets = new ArrayList<>();
         this.backgroundStars = new ArrayList<>();
         this.font = new BitmapFont();
@@ -231,9 +233,13 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         }
 
         // When falling, revert to the normal texture.
-        if (alien.getDeltaY() <= 0) {
-            alien.setTexture(alienNormalTexture);
+        if (alien.getDeltaY() <= -200) {
+            alien.setTexture(alienFallingTexture);
+        }else if(alien.getDeltaY() <= 200) {
+            alien.setTexture(alienNeutralTexture);
         }
+
+        System.out.println(alien.getDeltaY());
 
         alien.update(deltaTime);
 
@@ -312,8 +318,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     public void dispose() {
         batch.dispose();
         alien.dispose();
-        alienNormalTexture.dispose();
+        alienFallingTexture.dispose();
         alienJumpTexture.dispose();
+        alienNeutralTexture.dispose();
         font.dispose();
         for (AnimatedSprite planet : planets) {
             planet.dispose();
@@ -330,8 +337,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             if (isFirstInput) {
                 isFirstInput = false;
             }
-
-            jumpingMusic.play();
+            long id = jumpingMusic.play(0.5f);
+            jumpingMusic.setPitch(id, 0.5f);
+            // jumpingMusic.play();
 
             alien.setDeltaY(BOUNCE_VELOCITY);
             // Switch to the jump texture when the alien jumps
@@ -345,12 +353,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         if (isFirstInput) {
             isFirstInput = false;
         }
-
-        if (!jumpingMusic.isPlaying()) {
-            jumpingMusic.play();
-        } else {
-            jumpingMusic.play();
-        }
+        long id = jumpingMusic.play(0.5f);
+        jumpingMusic.setPitch(id, 0.5f);
+        // jumpingMusic.play();
 
         alien.setDeltaY(BOUNCE_VELOCITY);
         // Switch to the jump texture when the alien jumps
