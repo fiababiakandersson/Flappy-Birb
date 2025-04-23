@@ -1,14 +1,10 @@
 package se.yrgo.game;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.utils.*;
 
 public class MenuScreen extends ScreenAdapter {
     private AlienGame alienGame;
@@ -66,13 +62,13 @@ public class MenuScreen extends ScreenAdapter {
             int y = Gdx.graphics.getHeight() - Gdx.input.getY(); // Convert to game coordinates
 
             if (easyBounds.contains(x, y)) {
-                alienGame.setDifficulty(AlienGame.Difficulty.EASY);
+                alienGame.setDifficulty(Difficulty.EASY);
                 alienGame.newGame();
             } else if (mediumBounds.contains(x, y)) {
-                alienGame.setDifficulty(AlienGame.Difficulty.MEDIUM);
+                alienGame.setDifficulty(Difficulty.MEDIUM);
                 alienGame.newGame();
             } else if (hardBounds.contains(x, y)) {
-                alienGame.setDifficulty(AlienGame.Difficulty.HARD);
+                alienGame.setDifficulty(Difficulty.HARD);
                 alienGame.newGame();
             }
         }

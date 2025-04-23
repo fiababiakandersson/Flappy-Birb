@@ -5,7 +5,7 @@ import java.util.concurrent.*;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input.*;
-import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
@@ -14,28 +14,16 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static final int ALIEN_WIDTH = 130;
     private static final int ALIEN_HEIGHT = 100;
 
-    // Difficulty-based constants
-//    private static final float EASY_SPEED_START = 100f;
-//    private static final float MEDIUM_SPEED_START = 130f;
-//    private static final float HARD_SPEED_START = 170f;
-//
-//    private static final float EASY_PLANET_SPAWN_INTERVAL = 2.0f;
-//    private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 1.5f;
-//    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
-//
-//    private static final int EASY_MAX_PLANETS = 4;
-//    private static final int MEDIUM_MAX_PLANETS = 5;
-//    private static final int HARD_MAX_PLANETS = 6;
-
     // Same speed for all difficulties
-    private static final float PLANET_SPEED = 130f;
+    private static float PLANET_SPEED = 130f;
     private static final float EASY_PLANET_SPAWN_INTERVAL = 3.0f;
     private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 2.0f;
-    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
+    private static final float HARD_PLANET_SPAWN_INTERVAL = 1.2f;
 
+    // Max planets allowed on screen per difficulty
     private static final int EASY_MAX_PLANETS = 3;
     private static final int MEDIUM_MAX_PLANETS = 5;
-    private static final int HARD_MAX_PLANETS = 8;
+    private static final int HARD_MAX_PLANETS = 6;
 
     private AlienGame alienGame;
     private SpriteBatch batch;
@@ -45,35 +33,35 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private BitmapFont font;
     private String[] planetsArr = { "bloodMoon.png", "earth.png", "jupiter.png", "mars.png", "moon.png", "venus.png" };
 
-    private static final float GRAVITY = -2700f;
-    private static final float BOUNCE_VELOCITY = 650f;
-    private static final int STAR_COUNT = 100; // Number of background stars
-    private static final float STAR_SPEED = -90f; // Background stars move slower than planets
+    private static final float GRAVITY = -1800f;
+    private static final float BOUNCE_VELOCITY = 680f;
+    private static final int STAR_COUNT = 50; // Number of background stars
 
     private boolean gameOver = false;
     private float elapsedTime;
-    private float speed;
     private boolean isFirstInput = true;
     private float planetSpawnTimer = 0;
     private static float PLANET_SPAWN_INTERVAL;
     private static int MAX_PLANETS_ON_SCREEN;
     private Music gamePlayMusic = Gdx.audio.newMusic(Gdx.files.internal("music/1.MainTheme-320bit(chosic.com).mp3"));
-    private Music jumpingMusic = Gdx.audio.newMusic(Gdx.files.internal("music/retro-jump.mp3"));
-    private Texture stars =  new Texture(Gdx.files.internal("extrasmallstars.png"));
+    private Sound jumpingMusic = Gdx.audio.newSound(Gdx.files.internal("music/retro-jump.mp3"));
+    private Texture stars = new Texture(Gdx.files.internal("extrasmallstars.png"));
 
     // New textures for normal and jump state
-    private Texture alienNormalTexture;
+    private Texture alienFallingTexture;
     private Texture alienJumpTexture;
+    private Texture alienNeutralTexture;
 
     public GameScreen(AlienGame alienGame) {
         this.alienGame = alienGame;
         this.batch = new SpriteBatch();
         // Load both textures
-        alienNormalTexture = new Texture("alien.png");
-        alienJumpTexture = new Texture("alienJumping.png"); // Make sure this image is in your assets folder
+        alienFallingTexture = new Texture("alienFalling.png");
+        alienJumpTexture = new Texture("alienJumping.png"); 
+        alienNeutralTexture = new Texture("alienNeutral.png"); 
 
         // Initialize alien with the normal texture
-        this.alien = new AnimatedSprite(alienNormalTexture, 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
+        this.alien = new AnimatedSprite(alienFallingTexture, 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
         this.planets = new ArrayList<>();
         this.backgroundStars = new ArrayList<>();
         this.font = new BitmapFont();
@@ -91,11 +79,20 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         for (int i = 0; i < STAR_COUNT; i++) {
             int x = random.nextInt(screenWidth);
             int y = random.nextInt(screenHeight);
-            int size = random.nextInt(10) + 2; // Random size between 2 and 11 pixels
 
             // Create star (using stars.png texture)
-            AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42, 64
-            star.setDeltaX(STAR_SPEED); // Stars move slowly to the left
+            AnimatedSprite star = new AnimatedSprite(stars, x, y, 21, 32); // stars.png 171, 256 // smallstars.png 42,
+                                                                           // 64
+
+            // make planets move faster depending on difficulty
+            float minSpeedFactor = 0.4f; // 40% of PLANET_SPEED
+            float maxSpeedFactor = 0.8f; // 70% of PLANET_SPEED
+
+            float speedFactor = minSpeedFactor + random.nextFloat() * (maxSpeedFactor - minSpeedFactor);
+            float starSpeed = -PLANET_SPEED * speedFactor;
+
+            star.setDeltaX(starSpeed);
+
             backgroundStars.add(star);
         }
     }
@@ -146,7 +143,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         String planetTexturePath = randomizePlanet();
         Texture planetTexture = new Texture(planetTexturePath);
 
-        AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(), planetTexture.getHeight());
+        AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(),
+                planetTexture.getHeight());
         planet.setDeltaX(-PLANET_SPEED);
         planets.add(planet);
     }
@@ -171,10 +169,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
                 MAX_PLANETS_ON_SCREEN = EASY_MAX_PLANETS;
                 break;
             case MEDIUM:
+                PLANET_SPEED = 180f;
                 PLANET_SPAWN_INTERVAL = MEDIUM_PLANET_SPAWN_INTERVAL;
                 MAX_PLANETS_ON_SCREEN = MEDIUM_MAX_PLANETS;
                 break;
             case HARD:
+                PLANET_SPEED = 200f;
                 PLANET_SPAWN_INTERVAL = HARD_PLANET_SPAWN_INTERVAL;
                 MAX_PLANETS_ON_SCREEN = HARD_MAX_PLANETS;
                 break;
@@ -198,7 +198,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             return;
         }
 
-        if(!gamePlayMusic.isPlaying() && !gameOver){
+        if (!gamePlayMusic.isPlaying() && !gameOver) {
             gamePlayMusic.play();
         }
 
@@ -215,17 +215,19 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         checkForGameOver();
     }
 
-
-    // speed
     private void updateState(float deltaTime) {
         if (!isFirstInput) {
             alien.setDeltaY(alien.getDeltaY() + GRAVITY * deltaTime);
         }
 
         // When falling, revert to the normal texture.
-        if (alien.getDeltaY() <= 0) {
-            alien.setTexture(alienNormalTexture);
+        if (alien.getDeltaY() <= -200) {
+            alien.setTexture(alienFallingTexture);
+        }else if(alien.getDeltaY() <= 200) {
+            alien.setTexture(alienNeutralTexture);
         }
+
+        System.out.println(alien.getDeltaY());
 
         alien.update(deltaTime);
 
@@ -304,8 +306,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     public void dispose() {
         batch.dispose();
         alien.dispose();
-        alienNormalTexture.dispose();
+        alienFallingTexture.dispose();
         alienJumpTexture.dispose();
+        alienNeutralTexture.dispose();
         font.dispose();
         for (AnimatedSprite planet : planets) {
             planet.dispose();
@@ -322,10 +325,10 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             if (isFirstInput) {
                 isFirstInput = false;
             }
+            long id = jumpingMusic.play(0.5f);
+            jumpingMusic.setPitch(id, 0.5f);
+            // jumpingMusic.play();
 
-          
-            jumpingMusic.play();
-            
             alien.setDeltaY(BOUNCE_VELOCITY);
             // Switch to the jump texture when the alien jumps
             alien.setTexture(alienJumpTexture);
@@ -338,14 +341,10 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         if (isFirstInput) {
             isFirstInput = false;
         }
+        long id = jumpingMusic.play(0.5f);
+        jumpingMusic.setPitch(id, 0.5f);
+        // jumpingMusic.play();
 
-        if(!jumpingMusic.isPlaying()){
-            jumpingMusic.play();
-        }
-        else{
-            jumpingMusic.play();
-        }
-        
         alien.setDeltaY(BOUNCE_VELOCITY);
         // Switch to the jump texture when the alien jumps
         alien.setTexture(alienJumpTexture);
