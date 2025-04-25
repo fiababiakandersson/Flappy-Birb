@@ -287,15 +287,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             }
         }
 
-        if (alien.getY() <= 0) {
-            gamePlayMusic.pause();
-            gameOver = true;
-        }
-
-        if (alien.getY() + alien.getHeight() >= Gdx.graphics.getHeight()) {
-            gameOver = true;
-        }
-
         if (gameOver) {
             gamePlayMusic.stop();
             alienGame.gameOver();
