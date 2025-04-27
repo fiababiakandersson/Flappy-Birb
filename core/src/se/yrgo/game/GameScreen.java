@@ -14,18 +14,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
     private static final int ALIEN_WIDTH = 130;
     private static final int ALIEN_HEIGHT = 100;
 
-    // Difficulty-based constants
-    // private static final float MEDIUM_SPEED_START = 130f;
-    // private static final float HARD_SPEED_START = 170f;
-    //
-    // private static final float EASY_PLANET_SPAWN_INTERVAL = 2.0f;
-    // private static final float MEDIUM_PLANET_SPAWN_INTERVAL = 1.5f;
-    // private static final float HARD_PLANET_SPAWN_INTERVAL = 1.0f;
-    //
-    // private static final int EASY_MAX_PLANETS = 4;
-    // private static final int MEDIUM_MAX_PLANETS = 5;
-    // private static final int HARD_MAX_PLANETS = 6;
-
     // Same speed for all difficulties
     private static float PLANET_SPEED = 130f;
     private static final float EASY_PLANET_SPAWN_INTERVAL = 3.0f;
@@ -297,15 +285,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             if (planet.overlaps(alien)) {
                 gameOver = true;
             }
-        }
-
-        if (alien.getY() <= 0) {
-            gamePlayMusic.pause();
-            gameOver = true;
-        }
-
-        if (alien.getY() + alien.getHeight() >= Gdx.graphics.getHeight()) {
-            gameOver = true;
         }
 
         if (gameOver) {
