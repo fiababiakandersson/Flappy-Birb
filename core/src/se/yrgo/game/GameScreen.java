@@ -156,17 +156,19 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
         System.out.println(alienGame.getPoints());
 
-        //Save the game from crashing 
-        if (alienGame.getPoints() == 1) { //Max: 2147483647
-            for(int wall = 0; wall <= screenHeight; wall +=90){
-                AnimatedSprite planet = new AnimatedSprite(planetTexture, x, wall, planetTexture.getWidth() ,planetTexture.getWidth());
+        // Save the game from crashing
+        if (alienGame.getPoints() == 2147483640) { // Max: 2147483647
+            for (int wall = 0; wall <= screenHeight; wall += 90) {
+                AnimatedSprite planet = new AnimatedSprite(planetTexture, x, wall, planetTexture.getWidth(),
+                        planetTexture.getWidth());
                 planet.setDeltaX(-PLANET_SPEED);
                 planets.add(planet);
             }
-        } else{
-            AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(), planetTexture.getHeight());
+        } else {
+            AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(),
+                    planetTexture.getHeight());
             planet.setDeltaX(-PLANET_SPEED);
-            planets.add(planet);       
+            planets.add(planet);
         }
         // planet.setDeltaX(-PLANET_SPEED);
         // planets.add(planet);
@@ -246,7 +248,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         // When falling, revert to the normal texture.
         if (alien.getDeltaY() <= -200) {
             alien.setTexture(alienFallingTexture);
-        }else if(alien.getDeltaY() <= 200) {
+        } else if (alien.getDeltaY() <= 200) {
             alien.setTexture(alienNeutralTexture);
         }
 
