@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
 
 public class GameScreen extends ScreenAdapter implements InputProcessor {
+    private static final int screenWidth = Gdx.graphics.getWidth();
+    private static final int screenHeight = Gdx.graphics.getHeight();
     private static final int ALIEN_WIDTH = 130;
     private static final int ALIEN_HEIGHT = 100;
 
@@ -57,8 +59,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         this.batch = new SpriteBatch();
         // Load both textures
         alienFallingTexture = new Texture("alienFalling.png");
-        alienJumpTexture = new Texture("alienJumping.png"); 
-        alienNeutralTexture = new Texture("alienNeutral.png"); 
+        alienJumpTexture = new Texture("alienJumping.png");
+        alienNeutralTexture = new Texture("alienNeutral.png");
 
         // Initialize alien with the normal texture
         this.alien = new AnimatedSprite(alienFallingTexture, 0, 0, ALIEN_WIDTH, ALIEN_HEIGHT);
@@ -73,8 +75,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
 
     private void initializeBackgroundStars() {
         Random random = new Random();
-        int screenWidth = Gdx.graphics.getWidth();
-        int screenHeight = Gdx.graphics.getHeight();
 
         for (int i = 0; i < STAR_COUNT; i++) {
             int x = random.nextInt(screenWidth);
@@ -134,6 +134,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             attempts++;
         } while (!positionValid && attempts < maxAttempts);
 
+        // System.out.println("attempts: " + attempts + " x: " + x + " y: " + y + "
+        // positionValid: " + positionValid);
         if (positionValid) {
             addPlanet(x, y);
         }
@@ -143,10 +145,31 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
         String planetTexturePath = randomizePlanet();
         Texture planetTexture = new Texture(planetTexturePath);
 
-        AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(),
-                planetTexture.getHeight());
-        planet.setDeltaX(-PLANET_SPEED);
-        planets.add(planet);
+        // If cheating in the start, or touching floor/ruff
+        if (alien.getDeltaY() == 0f) {
+            y = (int) alien.getY();
+        } else if (alien.getY() == 0) {
+            y = 0;
+        } else if (alien.getY() >= (screenHeight - (int) alien.getHeight())) {
+            y = (screenHeight - (int) alien.getHeight());
+        }
+
+        System.out.println(alienGame.getPoints());
+
+        //Save the game from crashing 
+        if (alienGame.getPoints() == 1) { //Max: 2147483647
+            for(int wall = 0; wall <= screenHeight; wall +=90){
+                AnimatedSprite planet = new AnimatedSprite(planetTexture, x, wall, planetTexture.getWidth() ,planetTexture.getWidth());
+                planet.setDeltaX(-PLANET_SPEED);
+                planets.add(planet);
+            }
+        } else{
+            AnimatedSprite planet = new AnimatedSprite(planetTexture, x, y, planetTexture.getWidth(), planetTexture.getHeight());
+            planet.setDeltaX(-PLANET_SPEED);
+            planets.add(planet);       
+        }
+        // planet.setDeltaX(-PLANET_SPEED);
+        // planets.add(planet);
     }
 
     @Override
@@ -227,7 +250,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor {
             alien.setTexture(alienNeutralTexture);
         }
 
-        System.out.println(alien.getDeltaY());
+        // System.out.println(alien.getDeltaY());
 
         alien.update(deltaTime);
 
